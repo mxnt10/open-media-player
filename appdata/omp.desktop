@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Version=1.0
+GenericName=Open Media Player
+Name=Open Media Player
+Comment=Multimedia player
+Exec=omp %F
+Icon=omp
+Terminal=false
+Categories=Qt;AudioVideo;Player;Audio;Video;
+MimeType=audio/mp3;audio/x-mp3;video/mpeg;video/mpeg-system;video/x-mpeg;video/mp4;
+X-KDE-StartupNotify=false

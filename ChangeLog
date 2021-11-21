@@ -1,0 +1,34 @@
+# ChangeLog
+All notable changes to this project will be documented in this file.
+Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+
+
+## [ 1.0 ] - 2021-11-21 #############################################
+
+### Added / Adicionado
+ - Efeito visual:
+    - Logo exibido enquanto uma mídia não é executada.
+    - Barra de controles na coloração #100022.
+    - Menu de contexto na coloração #150033.
+    - Botões e Barra de execução personalizados.
+    - Efeito visual nos botões.
+ - Controles:
+    - Botão Play/Pause.
+    - Botão Stop.
+ - Menu de contexto:
+    - Menu Open(Abrir).
+    - Menu About(Sobre).
+ - Teclas de atalho:
+    - Open: Ctrl+A.
+ - Recursos:
+    - Mudar o progresso da música, clicando na barra de execução
+      normalmente como nos demais reprodutores.
+    - Entrar e sair do modo tela cheia com dois cliques.
+    - Executar e pausar com um clique na tela. Nota: Vai haver um
+      delay de 400ms ao pausar e executar, pois é o tempo
+      que foi pré-definido para o duplo clique. Se em 400ms não
+      teve dois cliques, o programa pausa. Ao contrário entra em
+      modo tela cheia.
+###
+
+#####################################################################

@@ -89,12 +89,6 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.pointClicked.connect(self.setPosition)
         self.positionSlider.setStyleSheet(styleSheet())
 
-        # Botão para exibir e ocultar a playlist
-        self.showHidePlaylist = PushButton(32)
-        self.showHidePlaylist.setIcon(setIconTheme(self, theme, 'left'))
-        self.showHidePlaylist.setFixedSize(18, 32)
-        self.showHidePlaylist.setIconSize(QSize(32, 32))
-
         # Layout só para ajustar a barra de execução
         self.positionLayout = QHBoxLayout()
         self.positionLayout.setContentsMargins(10, 5, 10, 5)
@@ -114,11 +108,6 @@ class MultimediaPlayer(QWidget):
         QHLine.setFrameShadow(QFrame.Raised)
         QHLine.setStyleSheet(styleLine())
 
-        # Ajuste ultra fino da linha vertical para melhor efeito visual
-        CVFrame = QHBoxLayout()
-        CVFrame.setContentsMargins(0, 10, 3, 10)
-        CVFrame.addWidget(QVLine)
-
         # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
         self.panelSHPlaylist.setStyleSheet('background: #000000')
@@ -127,8 +116,7 @@ class MultimediaPlayer(QWidget):
         self.positionSHPlaylist = QHBoxLayout(self.panelSHPlaylist)
         self.positionSHPlaylist.setContentsMargins(0, 0, 3, 0)
         self.positionSHPlaylist.setSpacing(0)
-        self.positionSHPlaylist.addLayout(CVFrame)
-        self.positionSHPlaylist.addWidget(self.showHidePlaylist)
+        self.positionSHPlaylist.addWidget(QVLine)
 
         # Widget para aplicar funcionalidades nos controles em playerControls
         self.controls = PlayerControls(self)
@@ -175,6 +163,7 @@ class MultimediaPlayer(QWidget):
         self.layout.addWidget(self.panelSHPlaylist, 0, 1)
         self.layout.addWidget(self.panelControl, 1, 0, 1, 2)  # Os layouts dos controles
         self.setLayout(self.layout)
+        self.panelSHPlaylist.hide()
 
         # Configurações de atalhos de teclado
         self.shortcut = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
@@ -283,14 +272,13 @@ class MultimediaPlayer(QWidget):
             # Montagem do menu de contexto
             menu = QMenu()
             menu.addAction(openMenu)
-            menu.addAction(openSettings)
+            # menu.addAction(openSettings)
             menu.addSeparator()
             menu.addAction(openAbout)
             menu.setStyleSheet('background-color: #150033;'
                                'color: #ffffff;'
                                'border: 6px solid #150033;')
             menu.exec_(self.mapToGlobal(point))
-
 
 
     # def mouseReleaseEvent(self, event):
