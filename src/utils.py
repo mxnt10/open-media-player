@@ -66,9 +66,9 @@ def setIconTheme(self, theme, icon):
     if theme == 'system':
         return defaultSystemIcons(self, icon)
     elif isfile(icon_theme + theme + '/' + icon + '.svg'):
-        return QIcon(l_icon_theme + theme + '/' + icon + '.svg')
+        return QIcon(icon_theme + theme + '/' + icon + '.svg')
     elif isfile(icon_theme + theme + '/' + icon + '.png'):
-        return QIcon(l_icon_theme + theme + '/' + icon + '.png')
+        return QIcon(icon_theme + theme + '/' + icon + '.png')
     elif isfile(l_icon_theme + theme + '/' + icon + '.svg'):
         warning('\033[33m ' + icon + ' icon not found in system.\033[32m Use a local theme icons...\033[m')
         return QIcon(l_icon_theme + theme + '/' + icon + '.svg')
