@@ -41,14 +41,15 @@ from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QSize
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QVBoxLayout, QAction, QMenu, QHBoxLayout, QShortcut,
-                             QSlider, QGridLayout, QDesktopWidget, QPushButton, QFrame, QLabel)
+                             QSlider, QGridLayout, QDesktopWidget, QFrame)
 
 # Modulos integrados (src)
 from about import AboutDialog
+from event import PushButton
 from playerControls import PlayerControls
 from style import styleSheet, styleLine
 from utils import setIconTheme, setIcon
-from videoWidget import VideoWidget
+from video import VideoWidget, PixmapLabel
 
 
 ########################################################################################################################
@@ -75,7 +76,7 @@ class MultimediaPlayer(QWidget):
         # irá fazer a reprodução dos arquivos multimídia. O videoWidget vai criar um widget para
         # a visualização do vídeo.
         self.mediaPlayer = QMediaPlayer()
-        self.videoWidget = VideoWidget()
+        self.videoWidget = VideoWidget(self)
         self.mediaPlayer.setVideoOutput(self.videoWidget)
 
         # Essa aqui é a barra que mostra o progresso da execução do arquivo multimídia
@@ -85,24 +86,44 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.setStyleSheet(styleSheet())
 
         # Botão para exibir e ocultar a playlist
-        self.showHidePlaylist = QPushButton()
+        self.showHidePlaylist = PushButton(32)
         self.showHidePlaylist.setIcon(setIconTheme(self, theme, 'left'))
         self.showHidePlaylist.setFixedSize(18, 32)
         self.showHidePlaylist.setIconSize(QSize(32, 32))
-        self.showHidePlaylist.setStyleSheet('border: 0')
 
         # Layout só para ajustar a barra de execução
         self.positionLayout = QHBoxLayout()
         self.positionLayout.setContentsMargins(10, 5, 10, 5)
         self.positionLayout.addWidget(self.positionSlider)
 
-        # Container só para dar uma corzinha diferente para o layout da playlist.
+        # Precisa de tudo só para o cara ter duas linhas personalizadas no programa.
+        # Essa aqui cria um linha vertical.
+        QVLine = QFrame(self)
+        QVLine.setFrameShape(QFrame.VLine)
+        QVLine.setFrameShadow(QFrame.Raised)
+        QVLine.setStyleSheet(styleLine())
+
+        # Essa aqui cria uma linha horizontal no programa. A função dessas linhas é só para
+        # efeito visual mesmo.
+        QHLine = QFrame(self)
+        QHLine.setFrameShape(QFrame.HLine)
+        QHLine.setFrameShadow(QFrame.Raised)
+        QHLine.setStyleSheet(styleLine())
+
+        # Ajuste ultra fino da linha vertical para melhor efeito visual
+        CVFrame = QHBoxLayout()
+        CVFrame.setContentsMargins(0, 10, 3, 10)
+        CVFrame.addWidget(QVLine)
+
+        # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
         self.panelSHPlaylist.setStyleSheet('background: #000000')
 
         # Layout só para ajustar o botão de mostrar e ocultar a playlist
         self.positionSHPlaylist = QHBoxLayout(self.panelSHPlaylist)
-        self.positionSHPlaylist.setContentsMargins(3, 0, 3, 0)
+        self.positionSHPlaylist.setContentsMargins(0, 0, 3, 0)
+        self.positionSHPlaylist.setSpacing(0)
+        self.positionSHPlaylist.addLayout(CVFrame)
         self.positionSHPlaylist.addWidget(self.showHidePlaylist)
 
         # Widget para aplicar funcionalidades nos controles em playerControls
@@ -123,33 +144,21 @@ class MultimediaPlayer(QWidget):
         self.panelControl = QWidget()
         self.panelControl.setStyleSheet('background: #100022')
 
-        # O layout para botar tudo dentro do conteiner
-        self.lay = QVBoxLayout(self.panelControl)  # Entrando com o conteiner como parâmetro
-        self.lay.setContentsMargins(0, 0, 0, 0)  # Ajuste para os controles não colar debaixo da janela
+        # O layout para botar tudo o que é de controle barra e tal, dentro do conteiner
+        self.lay = QVBoxLayout(self.panelControl)
+        self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
+        self.lay.addWidget(QHLine)
         self.lay.addLayout(self.positionLayout)
         self.lay.addLayout(self.controlLayout)
 
-        # Precisa de tudo só para o cara ter duas linhas personalizadas no programa.
-        # Essa aqui cria um linha vertical.
-        QVLine = QFrame(self)
-        QVLine.setFrameShape(QFrame.VLine)
-        QVLine.setFrameShadow(QFrame.Raised)
-        QVLine.setStyleSheet(styleLine())
-
-        # Essa aqui cria uma linha horizontal no programa. A função dessas linhas é só para
-        # efeito visual mesmo.
-        QHLine = QFrame(self)
-        QHLine.setFrameShape(QFrame.HLine)
-        QHLine.setFrameShadow(QFrame.Raised)
-        QHLine.setStyleSheet(styleLine())
-
         # Acho legal entrar com uma logo no programa.
-        self.startLogo = QLabel()
+        self.startLogo = PixmapLabel(self)
         self.startLogo.setPixmap(QPixmap(setIcon(logo=True)))
         self.startLogo.setAlignment(Qt.AlignCenter)
 
-        # self.movie = QMovie('../gif_view/effects4.gif')
+        # self.startLogo.setScaledContents(True)
+        # self.movie = QMovie('../gif_view/effects1.gif')
         # self.startLogo.setMovie(self.movie)
         # self.movie.start()
 
@@ -159,10 +168,8 @@ class MultimediaPlayer(QWidget):
         self.layout.setSpacing(0)
         self.layout.addWidget(self.videoWidget, 0, 0)
         self.layout.addWidget(self.startLogo, 0, 0)
-        self.layout.addWidget(QVLine, 0, 1)
-        self.layout.addWidget(self.panelSHPlaylist, 0, 2)
-        self.layout.addWidget(QHLine, 1, 0, 1, 3)
-        self.layout.addWidget(self.panelControl, 2, 0, 1, 3)  # Os layouts dos controles
+        self.layout.addWidget(self.panelSHPlaylist, 0, 1)
+        self.layout.addWidget(self.panelControl, 1, 0, 1, 2)  # Os layouts dos controles
         self.setLayout(self.layout)
 
         # Configurações de atalhos de teclado
@@ -177,6 +184,9 @@ class MultimediaPlayer(QWidget):
 
         # Necessário para setar o tempo de execução do arquivo multimídia em segundos
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
+
+
+########################################################################################################################
 
 
     # Função necessária para a entrada de parâmetros no programa.
@@ -240,6 +250,21 @@ class MultimediaPlayer(QWidget):
         about.exec_()
 
 
+    # Esses carinhas vão ser executados de dentro de VideoWidget e PixmapLabel. Esse aqui,
+    # é para habilitar o modo de tela cheia.
+    def onFullScreen(self):
+        self.showNormal()
+        self.panelSHPlaylist.show()
+        self.panelControl.show()
+
+
+    # E esse desabilita a tela cheia.
+    def unFullScreen(self):
+        self.showFullScreen()
+        self.panelSHPlaylist.hide()
+        self.panelControl.hide()
+
+
     # Menu de contexto personalizado para o programa, bem no capricho.
     def contextMenuRequested(self, point):
 
@@ -267,6 +292,11 @@ class MultimediaPlayer(QWidget):
                            'border: 6px solid #150033;')
         menu.exec_(self.mapToGlobal(point))
 
+
+
+    # def mouseReleaseEvent(self, event):
+    #     if event.button() == Qt.LeftButton:
+    #         print('foi')
 
     # def mousePressEvent(self, evt):
     #     self.oldPos = evt.globalPos()

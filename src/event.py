@@ -20,6 +20,7 @@ class PushButton(QPushButton):
         self.__fading_button = None
         self.num = num
         self.pressed.connect(lambda: self.onEffect(num))
+        self.setStyleSheet('border: 0')
 
 
     # Esse evento funciona quando o mouse passa encima dos botões.

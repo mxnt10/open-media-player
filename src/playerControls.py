@@ -35,7 +35,6 @@ class PlayerControls(QWidget):
         self.playButton.setIcon(setIconTheme(self, theme, 'play'))
         self.playButton.setFixedSize(48, 48)  # Durante o efeito, os botões não podem sair do lugar.
         self.playButton.setIconSize(QSize(48, 48))
-        self.playButton.setStyleSheet('border: 0')
         self.playButton.clicked.connect(self.pressPlay)
 
         # Definição do botão stop
@@ -44,7 +43,6 @@ class PlayerControls(QWidget):
         self.stopButton.setEnabled(False)
         self.stopButton.setFixedSize(30, 30)  # Durante o efeito, os botões não podem sair do lugar.
         self.stopButton.setIconSize(QSize(30, 30))
-        self.stopButton.setStyleSheet('border: 0')
         self.stopButton.clicked.connect(self.stop)
 
         # Layout para posicionar os botões definidos
