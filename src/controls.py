@@ -5,8 +5,8 @@ from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QWidget, QHBoxLayout
 
 # Modulos integrados (src)
-from event import PushButton
 from utils import setIconTheme
+from widgets import PushButton
 
 
 ########################################################################################################################
@@ -25,6 +25,9 @@ class PlayerControls(QWidget):
     stop = pyqtSignal()
 
     def __init__(self, win, parent=None):
+        """
+            @param win: Aqui você entra com self.
+        """
         self.main = win
 
         super(PlayerControls, self).__init__(parent)

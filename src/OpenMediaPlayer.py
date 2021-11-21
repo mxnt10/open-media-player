@@ -41,15 +41,14 @@ from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QSize
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QVBoxLayout, QAction, QMenu, QHBoxLayout, QShortcut,
-                             QSlider, QGridLayout, QDesktopWidget, QFrame)
+                             QGridLayout, QDesktopWidget, QFrame)
 
 # Modulos integrados (src)
 from about import AboutDialog
-from event import PushButton
-from playerControls import PlayerControls
+from controls import PlayerControls
 from style import styleSheet, styleLine
 from utils import setIconTheme, setIcon
-from video import VideoWidget, PixmapLabel
+from widgets import PushButton, VideoWidget, PixmapLabel, Slider
 
 
 ########################################################################################################################
@@ -72,6 +71,11 @@ class MultimediaPlayer(QWidget):
         self.setMinimumSize(800, 600)
         self.center()
 
+        # Instrução para habilitar o menu de contexto no Open Media Player. O programa não contará
+        # com uma barra de menu habilitada por padrão, então será usado menu de contexto.
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested[QPoint].connect(self.contextMenuRequested)
+
         # Parte principal do programa. O mediaPlayer vai ser definido com a engine QMediaPlayer que
         # irá fazer a reprodução dos arquivos multimídia. O videoWidget vai criar um widget para
         # a visualização do vídeo.
@@ -80,9 +84,9 @@ class MultimediaPlayer(QWidget):
         self.mediaPlayer.setVideoOutput(self.videoWidget)
 
         # Essa aqui é a barra que mostra o progresso da execução do arquivo multimídia
-        self.positionSlider = QSlider(Qt.Horizontal)
+        self.positionSlider = Slider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
-        self.positionSlider.sliderMoved.connect(self.setPosition)
+        self.positionSlider.pointClicked.connect(self.setPosition)
         self.positionSlider.setStyleSheet(styleSheet())
 
         # Botão para exibir e ocultar a playlist
@@ -176,14 +180,9 @@ class MultimediaPlayer(QWidget):
         self.shortcut = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
         self.shortcut.activated.connect(self.openFile)
 
-        # Necessário para o funcionamento do botão play/pause
-        self.mediaPlayer.stateChanged.connect(self.controls.setState)
-
-        # Necessário para posicionar o tempo de execução do arquivo multimídia
-        self.mediaPlayer.positionChanged.connect(self.positionChanged)
-
-        # Necessário para setar o tempo de execução do arquivo multimídia em segundos
-        self.mediaPlayer.durationChanged.connect(self.durationChanged)
+        self.mediaPlayer.stateChanged.connect(self.controls.setState)   # Ação para o botão play/pause
+        self.mediaPlayer.positionChanged.connect(self.positionChanged)  # Alteração da barra de execução
+        self.mediaPlayer.durationChanged.connect(self.durationChanged)  # Setar o tempo de execução na barra
 
 
 ########################################################################################################################
@@ -209,7 +208,7 @@ class MultimediaPlayer(QWidget):
     # novamente o positionSlider para que ele possa funcionar perfeitamente.
     def setPlay(self):
         self.positionSlider.setRange(0, self.getduration)
-        self.mediaPlayer.play()
+        self.mediaPlayer.play()  # Play automático
 
 
     # Função para parar a execução e também forçar o positionSlider a voltar para o início, pois não é visualmente
@@ -267,35 +266,35 @@ class MultimediaPlayer(QWidget):
 
     # Menu de contexto personalizado para o programa, bem no capricho.
     def contextMenuRequested(self, point):
+        if not self.isFullScreen():
+            # Menu para abrir com arquivos de multimídia
+            openMenu = QAction(setIconTheme(self, theme, 'folder'), 'Open', self)
+            openMenu.setShortcut('Ctrl+A')
+            openMenu.triggered.connect(self.openFile)
 
-        # Menu para abrir com arquivos de multimídia
-        openMenu = QAction(setIconTheme(self, theme, 'folder'), 'Open', self)
-        openMenu.setShortcut('Ctrl+A')
-        openMenu.triggered.connect(self.openFile)
+            # Menu para abrir a janela de configurações
+            openSettings = QAction(setIconTheme(self, theme, 'settings'), 'Settings', self)
+            openSettings.setShortcut('Alt+S')
 
-        # Menu para abrir a janela de configurações
-        openSettings = QAction(setIconTheme(self, theme, 'settings'), 'Settings', self)
-        openSettings.setShortcut('Alt+S')
+            # Menu para abrir a janela sobre
+            openAbout = QAction(setIconTheme(self, theme, 'about'), 'About', self)
+            openAbout.triggered.connect(self.showAbout)
 
-        # Menu para abrir a janela sobre
-        openAbout = QAction(setIconTheme(self, theme, 'about'), 'About', self)
-        openAbout.triggered.connect(self.showAbout)
-
-        # Montagem do menu de contexto
-        menu = QMenu()
-        menu.addAction(openMenu)
-        menu.addAction(openSettings)
-        menu.addSeparator()
-        menu.addAction(openAbout)
-        menu.setStyleSheet('background-color: #150033;'
-                           'color: #ffffff;'
-                           'border: 6px solid #150033;')
-        menu.exec_(self.mapToGlobal(point))
+            # Montagem do menu de contexto
+            menu = QMenu()
+            menu.addAction(openMenu)
+            menu.addAction(openSettings)
+            menu.addSeparator()
+            menu.addAction(openAbout)
+            menu.setStyleSheet('background-color: #150033;'
+                               'color: #ffffff;'
+                               'border: 6px solid #150033;')
+            menu.exec_(self.mapToGlobal(point))
 
 
 
     # def mouseReleaseEvent(self, event):
-    #     if event.button() == Qt.LeftButton:
+    #     if event.button() == Qt.RightButton:
     #         print('foi')
 
     # def mousePressEvent(self, evt):
@@ -315,15 +314,8 @@ class MultimediaPlayer(QWidget):
 if __name__ == '__main__':
     openMediaplayer = QApplication(argv)
     multimediaPlayer = MultimediaPlayer()
-
     # multimediaPlayer.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-
     multimediaPlayer.show()
-
-    # Instrução para habilitar o menu de contexto no Open Media Player. O programa não contará
-    # com uma barra de menu habilitada por padrão, então será usado menu de contexto.
-    multimediaPlayer.setContextMenuPolicy(Qt.CustomContextMenu)
-    multimediaPlayer.customContextMenuRequested[QPoint].connect(multimediaPlayer.contextMenuRequested)
 
     # Entrada de argumentos
     if len(argv) > 1:
