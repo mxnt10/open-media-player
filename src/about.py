@@ -3,8 +3,8 @@
 
 # Módulos do PyQt5
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QLabel, QVBoxLayout
+from PyQt5.QtGui import QPixmap, QKeySequence
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QShortcut
 
 # Modulos integrados (src)
 from utils import setIcon
@@ -23,25 +23,20 @@ class Label(QLabel):
 
 # Dispensa comentários.
 class AboutDialog(QDialog):
-    def __init__(self, *args, **kwargs):
-        super(AboutDialog, self).__init__(*args, **kwargs)
+    def __init__(self):
+        super(AboutDialog, self).__init__()
         self.oldPos = None
+        self.block = 0
 
         # Propriedades da janela.
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setWindowTitle('About Open Media Player')
         self.setStyleSheet('background: #000000;'
                            'color: #ffffff;'
-                           'border: 5px solid #150033')
-        self.setFixedSize(0, 0)
-
-        # Definição do botão de OK
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.setStyleSheet('border: 0')
+                           'border: 6px solid #150033')
 
         # Definindo o layout e o título do texto
-        title = Label('Open Media Player - Version ' + str(__version__))
+        title = Label('Open Media Player v' + str(__version__))
         font = title.font()
         font.setPointSize(20)
         title.setFont(font)
@@ -49,29 +44,46 @@ class AboutDialog(QDialog):
         # Definição do ícone do programa como logo
         logo = Label()
         logo.setPixmap(QPixmap(setIcon(logo=True)))
+        logo.setToolTip("Close with one click")
 
         # Criando o layout
         layout = QVBoxLayout()
+        layout.setContentsMargins(50, 20, 50, 20)
         layout.addWidget(title)
         layout.addWidget(logo)
         layout.addWidget(Label('License: GNU General Public License Version 3 (GLPv3)\n'))
         layout.addWidget(Label('Maintainer: Mauricio Ferrari'))
-        layout.addWidget(Label('Contact: m10ferrari1200@gmail.com\n'))  # As informações
-        layout.addWidget(self.buttonBox)
+        layout.addWidget(Label('Contact: m10ferrari1200@gmail.com'))  # As informações
         self.setLayout(layout)
 
         # Definir tudo no centro
         for i in range(0, layout.count()):
             layout.itemAt(i).setAlignment(Qt.AlignHCenter)
 
+        # Já que não tem muita coisa explicita para fechar essa janela,
+        # botei várias teclas de atalho para isso.
+        self.shortcut1 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_Q), self)
+        self.shortcut1.activated.connect(self.close)
+        self.shortcut2 = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        self.shortcut2.activated.connect(self.close)
+
+
+    # Para sair é só dar um clique da janela que já fecha.
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.block == 0:
+                self.close()
+        self.block = 0
+
 
     # Isso eu botei por frescura mesmo. Apenas possibilita mover a janela.
-    def mousePressEvent(self, evt):
-        self.oldPos = evt.globalPos()
+    def mousePressEvent(self, event):
+        self.oldPos = event.globalPos()
 
 
     # A funções que faz a mágica e move a janela.
-    def mouseMoveEvent(self, evt):
-        delta = QPoint(evt.globalPos() - self.oldPos)
+    def mouseMoveEvent(self, event):
+        delta = QPoint(event.globalPos() - self.oldPos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
-        self.oldPos = evt.globalPos()
+        self.oldPos = event.globalPos()
+        self.block = 1
