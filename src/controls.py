@@ -24,13 +24,13 @@ class PlayerControls(QWidget):
     pause = pyqtSignal()
     stop = pyqtSignal()
 
-    def __init__(self, win, parent=None):
+    def __init__(self, win):
         """
             @param win: Aqui você entra com self.
         """
         self.main = win
 
-        super(PlayerControls, self).__init__(parent)
+        super(PlayerControls, self).__init__()
         self.playerState = QMediaPlayer.StoppedState
 
         # Definição do botão play/pause
