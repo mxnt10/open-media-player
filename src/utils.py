@@ -44,12 +44,20 @@ def setIcon(logo=False):
 # ícones. E também caso um determinado tema não tenha um determinado ícone em específico. Aí pra não ficar sem
 # ícone usa o do sistema mesmo.
 def defaultSystemIcons(self, icon):
+
+    # Controles
     if icon == 'play':
         return self.style().standardIcon(QStyle.SP_MediaPlay)
     elif icon == 'pause':
         return self.style().standardIcon(QStyle.SP_MediaPause)
     elif icon == 'stop':
         return self.style().standardIcon(QStyle.SP_MediaStop)
+
+    # Recursos
+    elif icon == 'fullscreen':
+        return self.style().standardIcon(QStyle.SP_ComputerIcon)
+
+    # Menu
     elif icon == 'folder':
         return self.style().standardIcon(QStyle.SP_DirIcon)
     elif icon == 'settings':
