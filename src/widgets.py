@@ -6,7 +6,7 @@
 from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QPushButton, QLabel, QSlider
+from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication
 
 # Essa variável vai servir para o auxilio do mapeamento de clique único
 state = None
@@ -36,11 +36,11 @@ class Slider(QSlider):
 
 # Essa classe controla todos os efeitos dos botões do programa.
 class PushButton(QPushButton):
-    def __init__(self, num, parent=None):
+    def __init__(self, num):
         """
             @param num: Aqui você entra com o tamanho dos ícones.
         """
-        super(PushButton, self).__init__(parent)
+        super(PushButton, self).__init__()
         self.__fading_button = None
         self.num = num
         self.pressed.connect(lambda: self.onEffect(num))
@@ -78,20 +78,34 @@ class PushButton(QPushButton):
 # Resolvi criar uma nova classe para a logo do programa para aproveitar o efeito do
 # duplo clique, pois a tela cheia só deve funcionar dessa forma.
 class PixmapLabel(QLabel):
-    def __init__(self, win, parent=None):
+    def __init__(self, win):
         """
             @param win: Aqui você entra com self.
         """
         self.win = win
-        super(QLabel, self).__init__(parent)
+        super(QLabel, self).__init__()
+        self.control = 0
 
 
     # Duplo clique para ativar e desativar o modo de tela cheia.
     def mouseDoubleClickEvent(self, event):
         if self.win.isFullScreen() & event.button() == Qt.LeftButton:
-            self.win.onFullScreen()
-        else:
             self.win.unFullScreen()
+        else:
+            self.win.onFullScreen()
+
+
+    # Ação para mostrar os controles clicando com o botão direito
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.RightButton:
+            if self.control == 0:
+                self.win.panelControl.show()
+                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                self.control = 1
+            else:
+                self.win.panelControl.hide()
+                QApplication.setOverrideCursor(Qt.BlankCursor)
+                self.control = 0
 
 
 ########################################################################################################################
@@ -99,12 +113,13 @@ class PixmapLabel(QLabel):
 
 # Classe para o mapeamento de eventos do mouse e demais configurações no widget de vídeo.
 class VideoWidget(QVideoWidget):
-    def __init__(self, win, parent=None):
+    def __init__(self, win):
         """
             @param win: Aqui você entra com self.
         """
         self.win = win
-        super(VideoWidget, self).__init__(parent)
+        super(VideoWidget, self).__init__()
+        self.control = 0
 
         # Após o término do vídeo reproduzido, ao tentar executar o vídeo novamente, o fundo não fica mais preto.
         # Esse recurso vai garantir que a cor no fundo do vídeo vai ser preto e deu e tá acabado.
@@ -117,13 +132,15 @@ class VideoWidget(QVideoWidget):
     # Duplo clique para ativar e desativar o modo de tela cheia.
     def mouseDoubleClickEvent(self, event):
         if self.win.isFullScreen() & event.button() == Qt.LeftButton:
-            self.win.onFullScreen()
-        else:
             self.win.unFullScreen()
+        else:
+            self.win.onFullScreen()
 
 
-    # Clique único para executar a função play/pause.
+    # Clique único para executar ações em modo de tela cheia.
     def mouseReleaseEvent(self, event):
+
+        # Ação para Executar e pausar com o botão esquerdo
         if event.button() == Qt.LeftButton:
             global state
             self.click_handler()  # Iniciando a escuta
@@ -131,6 +148,17 @@ class VideoWidget(QVideoWidget):
                 state = 1  # Pause
             else:
                 state = 2  # Play
+
+        # Ação para mostrar os controles clicando com o botão direito
+        if event.button() == Qt.RightButton:
+            if self.control == 0:
+                self.win.panelControl.show()
+                QApplication.setOverrideCursor(Qt.ArrowCursor)
+                self.control = 1
+            else:
+                self.win.panelControl.hide()
+                QApplication.setOverrideCursor(Qt.BlankCursor)
+                self.control = 0
 
 
 ########################################################################################################################

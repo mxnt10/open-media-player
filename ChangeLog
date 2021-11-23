@@ -3,6 +3,30 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
+## [ 1.1 ] - 2021-11-22 #############################################
+
+### Added / Adicionado
+ - Teclas de atalho:
+    - Fechar About(Sobre): Esc; Ctrl+Q.
+    - Open: Ctrl+O; Ctrl+A. Os dois servem.
+    - Sair do modo tela cheia: Esc.
+ - Recursos:
+    - Mostrar e exibir os controles com um clique com o botão
+      direito do mouse, no modo tela cheia.
+###
+
+### Changed / Modificado
+ - Janela About(Sobre) fecha com um clique.
+###
+
+### Fixed / Corrigido
+ - Corrigido a busca pelos ícones dos controles.
+ - Pequenas correções no modo tela cheia.
+###
+
+#####################################################################
+
+
 ## [ 1.0 ] - 2021-11-21 #############################################
 
 ### Added / Adicionado
@@ -29,6 +53,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
       que foi pré-definido para o duplo clique. Se em 400ms não
       teve dois cliques, o programa pausa. Ao contrário entra em
       modo tela cheia.
+    - Play automático ao abrir um arquivo multimídia.
 ###
 
 #####################################################################

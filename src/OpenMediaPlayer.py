@@ -37,7 +37,7 @@
 from sys import argv
 
 # Módulos do PyQt5
-from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QSize
+from PyQt5.QtCore import Qt, QDir, QUrl, QPoint
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QVBoxLayout, QAction, QMenu, QHBoxLayout, QShortcut,
@@ -48,7 +48,7 @@ from about import AboutDialog
 from controls import PlayerControls
 from style import styleSheet, styleLine
 from utils import setIconTheme, setIcon
-from widgets import PushButton, VideoWidget, PixmapLabel, Slider
+from widgets import VideoWidget, PixmapLabel, Slider
 
 
 ########################################################################################################################
@@ -166,8 +166,12 @@ class MultimediaPlayer(QWidget):
         self.panelSHPlaylist.hide()
 
         # Configurações de atalhos de teclado
-        self.shortcut = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
-        self.shortcut.activated.connect(self.openFile)
+        self.shortcut1 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
+        self.shortcut1.activated.connect(self.openFile)
+        self.shortcut2 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_O), self)
+        self.shortcut2.activated.connect(self.openFile)
+        self.shortcut2 = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        self.shortcut2.activated.connect(self.unFullScreen)
 
         self.mediaPlayer.stateChanged.connect(self.controls.setState)   # Ação para o botão play/pause
         self.mediaPlayer.positionChanged.connect(self.positionChanged)  # Alteração da barra de execução
@@ -241,16 +245,18 @@ class MultimediaPlayer(QWidget):
     # Esses carinhas vão ser executados de dentro de VideoWidget e PixmapLabel. Esse aqui,
     # é para habilitar o modo de tela cheia.
     def onFullScreen(self):
-        self.showNormal()
-        self.panelSHPlaylist.show()
-        self.panelControl.show()
+        QApplication.setOverrideCursor(Qt.BlankCursor)
+        self.showFullScreen()
+        # self.panelSHPlaylist.hide()
+        self.panelControl.hide()
 
 
     # E esse desabilita a tela cheia.
     def unFullScreen(self):
-        self.showFullScreen()
-        self.panelSHPlaylist.hide()
-        self.panelControl.hide()
+        QApplication.setOverrideCursor(Qt.ArrowCursor)
+        self.showNormal()
+        # self.panelSHPlaylist.show()
+        self.panelControl.show()
 
 
     # Menu de contexto personalizado para o programa, bem no capricho.
