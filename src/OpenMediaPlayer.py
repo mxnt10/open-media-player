@@ -138,6 +138,8 @@ class MultimediaPlayer(QWidget):
         self.controls.setState(self.mediaPlayer.state())  # Pega o estado do reprodutor
         self.controls.play.connect(self.setPlay)
         self.controls.pause.connect(self.mediaPlayer.pause)
+        self.controls.next.connect(self.playlist.next)
+        self.controls.previous.connect(self.playlist.previous)
         self.controls.stop.connect(self.setStop)
 
         # Layout especial para o ajuste dos controles abaixo do widget de vídeo
@@ -195,6 +197,7 @@ class MultimediaPlayer(QWidget):
         self.mediaPlayer.stateChanged.connect(self.controls.setState)   # Ação para o botão play/pause
         self.mediaPlayer.positionChanged.connect(self.positionChanged)  # Alteração da barra de execução
         self.mediaPlayer.durationChanged.connect(self.durationChanged)  # Setar o tempo de execução na barra
+        self.playlist.currentIndexChanged.connect(self.playlistPositionChanged)  # Muda a posição na playlist.
 
 
 ########################################################################################################################
@@ -229,6 +232,14 @@ class MultimediaPlayer(QWidget):
                 url = QUrl(name)
                 if url.isValid():
                     self.playlist.addMedia(QMediaContent(url))
+
+
+    # Isso aqui permite que seja mudado o posicionamento do item selecionado. Sem isso, os itens na playlist não
+    # ficam selecionados ao executar os arquivos multimídia e nem mudam a seleção ao tocar a próxima mídia ou
+    # a anterior. Por isso esse controle precisa ser feito.
+    def playlistPositionChanged(self, position):
+        self.playlistView.setCurrentIndex(
+            self.playlistModel.index(position, 0))
 
 
     # essa função é chamada quando você dá um duplo clique em um item da playlist,

@@ -17,6 +17,9 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
       direito do mouse, no modo tela cheia.
     - Adicionado uma Lista de execução.
     - Suporte ao arquivo m3u.
+ - Controles:
+    - Botão Next.
+    - Botão Previous.
  - Elaboração de um docstrig em utils e widgets.
 ###
 

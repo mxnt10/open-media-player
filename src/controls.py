@@ -1,6 +1,6 @@
 
 # Módulos do PyQt5
-from PyQt5.QtCore import pyqtSignal, QSize
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import QWidget, QHBoxLayout
 
@@ -23,10 +23,12 @@ class PlayerControls(QWidget):
     play = pyqtSignal()
     pause = pyqtSignal()
     stop = pyqtSignal()
+    next = pyqtSignal()
+    previous = pyqtSignal()
 
     def __init__(self, win):
         """
-            @param win: Aqui você entra com self.
+            :param win: Esse parâmetro precisa ser self.
         """
         self.main = win
 
@@ -36,23 +38,31 @@ class PlayerControls(QWidget):
         # Definição do botão play/pause
         self.playButton = PushButton(48)
         self.playButton.setIcon(setIconTheme(self, theme, 'play'))
-        self.playButton.setFixedSize(48, 48)  # Durante o efeito, os botões não podem sair do lugar.
-        self.playButton.setIconSize(QSize(48, 48))
         self.playButton.clicked.connect(self.pressPlay)
 
         # Definição do botão stop
         self.stopButton = PushButton(30)
         self.stopButton.setIcon(setIconTheme(self, theme, 'stop'))
         self.stopButton.setEnabled(False)
-        self.stopButton.setFixedSize(30, 30)  # Durante o efeito, os botões não podem sair do lugar.
-        self.stopButton.setIconSize(QSize(30, 30))
         self.stopButton.clicked.connect(self.stop)
+
+        # Definição do botão next
+        self.nextButton = PushButton(30)
+        self.nextButton.setIcon(setIconTheme(self, theme, 'next'))
+        self.nextButton.clicked.connect(self.next)
+
+        # Definição do botão previous
+        self.previousButton = PushButton(30)
+        self.previousButton.setIcon(setIconTheme(self, theme, 'previous'))
+        self.previousButton.clicked.connect(self.previous)
 
         # Layout para posicionar os botões definidos
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.stopButton)
+        layout.addWidget(self.previousButton)
         layout.addWidget(self.playButton)
+        layout.addWidget(self.nextButton)
         self.setLayout(layout)
 
 
