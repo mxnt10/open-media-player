@@ -222,7 +222,7 @@ class MultimediaPlayer(QWidget):
             if fileInfo.exists():
                 url = QUrl.fromLocalFile(fileInfo.absoluteFilePath())
                 if fileInfo.suffix().lower() == 'm3u':
-                    self.playlist.load(url)  # FIXME
+                    self.playlist.load(url)
                 else:
                     self.playlist.addMedia(QMediaContent(url))
             else:
