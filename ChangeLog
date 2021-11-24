@@ -3,16 +3,20 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
-## [ 1.1 ] - 2021-11-22 #############################################
+## [ 1.1 ] - 2021-11-25 #############################################
 
 ### Added / Adicionado
  - Teclas de atalho:
     - Fechar About(Sobre): Esc; Ctrl+Q.
     - Open: Ctrl+O; Ctrl+A. Os dois servem.
     - Sair do modo tela cheia: Esc.
+    - Alterar modo tela cheia: Alt+Enter.
+    - Sair do programa: Ctrl+Q.
  - Recursos:
     - Mostrar e exibir os controles com um clique com o botão
       direito do mouse, no modo tela cheia.
+    - Adicionado uma Lista de execução.
+    - Suporte ao arquivo m3u.
 ###
 
 ### Changed / Modificado
@@ -22,6 +26,8 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 ### Fixed / Corrigido
  - Corrigido a busca pelos ícones dos controles.
  - Pequenas correções no modo tela cheia.
+ - Correção ao entrar no modo tela cheia maximizado e não sair
+   maximizado também.
 ###
 
 #####################################################################

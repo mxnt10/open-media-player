@@ -55,7 +55,7 @@ def defaultSystemIcons(self, icon):
 
     # Recursos
     elif icon == 'fullscreen':
-        return self.style().standardIcon(QStyle.SP_ComputerIcon)
+        return QIcon.fromTheme('view-fullscreen')
 
     # Menu
     elif icon == 'folder':
@@ -63,7 +63,7 @@ def defaultSystemIcons(self, icon):
     elif icon == 'settings':
         return self.style().standardIcon(QStyle.SP_CustomBase)
     elif icon == 'about':
-        return self.style().standardIcon(QStyle.SP_MessageBoxInformation)
+        return QIcon.fromTheme('help-about')
 
 
 # Função que vai selecionar o tema dos ícones
