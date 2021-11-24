@@ -43,8 +43,10 @@ class PushButton(QPushButton):
         super(PushButton, self).__init__()
         self.__fading_button = None
         self.num = num
-        self.pressed.connect(lambda: self.onEffect(num))
+        self.setFixedSize(num, num)
+        self.setIconSize(QSize(num, num))
         self.setStyleSheet('border: 0')
+        self.pressed.connect(lambda: self.onEffect(num))
 
 
     # Esse evento funciona quando o mouse passa encima dos botões.
