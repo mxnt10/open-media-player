@@ -38,7 +38,7 @@ class Slider(QSlider):
 class PushButton(QPushButton):
     def __init__(self, num):
         """
-            @param num: Aqui você entra com o tamanho dos ícones.
+            :param num: Aqui você entra com o tamanho dos ícones.
         """
         super(PushButton, self).__init__()
         self.__fading_button = None
@@ -82,7 +82,7 @@ class PushButton(QPushButton):
 class PixmapLabel(QLabel):
     def __init__(self, win):
         """
-            @param win: Aqui você entra com self.
+            :param win: O parâmetro precisa ser self.
         """
         self.win = win
         super(QLabel, self).__init__()
@@ -117,7 +117,7 @@ class PixmapLabel(QLabel):
 class VideoWidget(QVideoWidget):
     def __init__(self, win):
         """
-            @param win: Aqui você entra com self.
+            :param win: O parâmetro precisa ser self.
         """
         self.win = win
         super(VideoWidget, self).__init__()
@@ -171,7 +171,7 @@ class VideoWidget(QVideoWidget):
 class ClickPlayPause:
     def __init__(self, win):
         """
-            @param win: Aqui você entra com self.win.
+            :param win: O parâmetro precisa ser self.win.
         """
 
         self.timer = QTimer()
