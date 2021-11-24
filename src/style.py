@@ -47,8 +47,3 @@ QLineEdit {
     font-weight: bold;
 }
     """
-
-
-# Essa função apenas retorna o estilo que será usado para as linhas.
-def styleLine():
-    return 'background: #444444; border: 1px solid #000000'
