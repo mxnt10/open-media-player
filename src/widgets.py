@@ -37,16 +37,16 @@ class Slider(QSlider):
 # Essa classe controla todos os efeitos dos botões do programa.
 class PushButton(QPushButton):
     def __init__(self, num):
+        self.num = num
         """
             :param num: Aqui você entra com o tamanho dos ícones.
         """
         super(PushButton, self).__init__()
         self.__fading_button = None
-        self.num = num
-        self.setFixedSize(num, num)
-        self.setIconSize(QSize(num, num))
+        self.setFixedSize(self.num, self.num)
+        self.setIconSize(QSize(self.num, self.num))
         self.setStyleSheet('border: 0')
-        self.pressed.connect(lambda: self.onEffect(num))
+        self.pressed.connect(self.onEffect)
 
 
     # Esse evento funciona quando o mouse passa encima dos botões.
@@ -61,16 +61,16 @@ class PushButton(QPushButton):
 
     # Efeito visual ao clicar nos botões. Esse efeito consiste em reduzir os botões em 2px.
     @pyqtSlot()
-    def onEffect(self, num):
+    def onEffect(self):
         self.__fading_button = self.sender()  # Mapear o sinal do botão a ser alterado
-        self.__fading_button.setIconSize(QSize(num - 2, num - 2))
-        QTimer.singleShot(100, lambda: self.unEffect(num))  # Timer do efeito
+        self.__fading_button.setIconSize(QSize(self.num - 2, self.num - 2))
+        QTimer.singleShot(100, lambda: self.unEffect())  # Timer do efeito
 
 
     # Para completar o efeito visual ao clicar nos botões. Depois da redução, o tamanho
     # precisa voltar ao normal.
-    def unEffect(self, num):
-        self.__fading_button.setIconSize(QSize(num + 2, num + 2))
+    def unEffect(self):
+        self.__fading_button.setIconSize(QSize(self.num + 2, self.num + 2))
         self.__fading_button = None  # Finalizar o estado do botão
 
 
@@ -170,6 +170,7 @@ class VideoWidget(QVideoWidget):
 # opções de executar e pausar. A ação de dois cliques não foi feita dessa forma.
 class ClickPlayPause:
     def __init__(self, win):
+        self.win = win
         """
             :param win: O parâmetro precisa ser self.win.
         """
@@ -177,18 +178,18 @@ class ClickPlayPause:
         self.timer = QTimer()
         self.timer.setInterval(400)  # O segredo da parada
         self.timer.setSingleShot(True)
-        self.timer.timeout.connect(lambda: self.timeout(win))
+        self.timer.timeout.connect(self.timeout)
         self.click_count = 0
 
 
     # Em 400ms essa função é acionada e se em 400ms teve mais de um clique,
     # ele vai executar as ações de executar ou pausar.
-    def timeout(self, win):
+    def timeout(self):
         if self.click_count == 1:
             if state == 1:
-                win.mediaPlayer.pause()
+                self.win.mediaPlayer.pause()
             if state == 2:
-                win.mediaPlayer.play()
+                self.win.mediaPlayer.play()
         self.click_count = 0
 
 
