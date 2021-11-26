@@ -49,9 +49,9 @@ class PlaylistModel(QAbstractItemModel):
     def setPlaylist(self, playlist):
         if self.m_playlist is not None:
             self.m_playlist.mediaAboutToBeInserted.disconnect(self.beginInsertItems)
-            self.m_playlist.mediaInserted.disconnect(self.endInsertItems)
+            self.m_playlist.mediaInserted.disconnect(self.endInsertRows)
             self.m_playlist.mediaAboutToBeRemoved.disconnect(self.beginRemoveItems)
-            self.m_playlist.mediaRemoved.disconnect(self.endRemoveItems)
+            self.m_playlist.mediaRemoved.disconnect(self.endRemoveRows)
             self.m_playlist.mediaChanged.disconnect(self.changeItems)
 
         self.beginResetModel()
@@ -59,9 +59,9 @@ class PlaylistModel(QAbstractItemModel):
 
         if self.m_playlist is not None:
             self.m_playlist.mediaAboutToBeInserted.connect(self.beginInsertItems)
-            self.m_playlist.mediaInserted.connect(self.endInsertItems)
+            self.m_playlist.mediaInserted.connect(self.endInsertRows)
             self.m_playlist.mediaAboutToBeRemoved.connect(self.beginRemoveItems)
-            self.m_playlist.mediaRemoved.connect(self.endRemoveItems)
+            self.m_playlist.mediaRemoved.connect(self.endRemoveRows)
             self.m_playlist.mediaChanged.connect(self.changeItems)
         self.endResetModel()
 
@@ -69,20 +69,13 @@ class PlaylistModel(QAbstractItemModel):
 ########################################################################################################################
 # Não avaliados.
 
+
     def beginInsertItems(self, start, end):
         self.beginInsertRows(QModelIndex(), start, end)
 
 
-    def endInsertItems(self):
-        self.endInsertRows()
-
-
     def beginRemoveItems(self, start, end):
         self.beginRemoveRows(QModelIndex(), start, end)
-
-
-    def endRemoveItems(self):
-        self.endRemoveRows()
 
 
     def changeItems(self, start, end):
