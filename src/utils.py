@@ -68,6 +68,8 @@ def defaultSystemIcons(self, icon):
     # Recursos
     elif icon == 'fullscreen':
         return QIcon.fromTheme('view-fullscreen')
+    elif icon == 'playlist':
+        return self.style().standardIcon(QStyle.SP_CustomBase)
 
     # Menu
     elif icon == 'folder':

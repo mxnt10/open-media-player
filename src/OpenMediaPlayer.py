@@ -75,7 +75,7 @@ class MultimediaPlayer(QWidget):
         self.setWindowTitle('Open Media Player')
         self.setWindowIcon(QIcon(setIcon()))
         self.setMinimumSize(800, 600)
-        self.setAcceptDrops(True)
+        self.setAcceptDrops(True)  # Suporte para arrastar itens ao programa.
         self.center()
 
         # Instrução para habilitar o menu de contexto no Open Media Player. O programa não contará
@@ -91,7 +91,7 @@ class MultimediaPlayer(QWidget):
         self.videoWidget = VideoWidget(self)
         self.mediaPlayer.setVideoOutput(self.videoWidget)
 
-        # Necessário para a criação da playlist.
+        # Necessário para a criação da playlist
         self.playlist = QMediaPlaylist()
         self.mediaPlayer.setPlaylist(self.playlist)
 
@@ -108,13 +108,13 @@ class MultimediaPlayer(QWidget):
                                         'color: #ffffff;'
                                         'background: #100022')
 
-        # Essa aqui é a barra que mostra o progresso da execução do arquivo multimídia
+        # Essa aqui é a barra que mostra o progresso da reprodução do arquivo multimídia
         self.positionSlider = Slider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.pointClicked.connect(self.setPosition)
         self.positionSlider.setStyleSheet(styleSheet())
 
-        # Layout só para ajustar a barra de execução
+        # Layout só para ajustar a barra de progresso de reprodução
         self.positionLayout = QHBoxLayout()
         self.positionLayout.setContentsMargins(10, 5, 10, 5)
         self.positionLayout.addWidget(self.positionSlider)
@@ -132,7 +132,7 @@ class MultimediaPlayer(QWidget):
         self.panelSHPlaylist.setStyleSheet('background: #000000')
         self.panelSHPlaylist.setFixedWidth(300)
 
-        # Layout só para ajustar o botão de mostrar e ocultar a playlist
+        # Layout só para ajustar as propriedades da playlist
         self.positionSHPlaylist = QHBoxLayout(self.panelSHPlaylist)
         self.positionSHPlaylist.setContentsMargins(6, 6, 6, 6)
         self.positionSHPlaylist.setSpacing(0)
@@ -219,12 +219,13 @@ class MultimediaPlayer(QWidget):
         # Menu de contexto personalizado para o programa no capricho
         self.menu = QMenu()
 
-        # Menu para abrir com arquivos de multimídia
+        # Menu para abrir os arquivos de multimídia
         self.openMenu = QAction(setIconTheme(self, theme, 'folder'), 'Open', self)
         self.openMenu.setShortcut('Ctrl+O')
         self.openMenu.triggered.connect(self.openFile)
 
-        self.controlPlaylist = QAction(setIconTheme(self, theme, 'fullscreen'), 'Show Playlist', self)
+        # Adicionar e ocultar a playlist
+        self.controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), 'Show Playlist', self)
         self.controlPlaylist.triggered.connect(self.showPlayList)
 
         # Menu para abrir a janela de configurações
@@ -282,14 +283,14 @@ class MultimediaPlayer(QWidget):
 
 
     # Isso aqui permite que seja mudado o posicionamento do item selecionado. Sem isso, os itens na playlist não
-    # ficam selecionados ao executar os arquivos multimídia e nem mudam a seleção ao tocar a próxima mídia ou
+    # ficam selecionados ao reproduzir os arquivos multimídia e nem mudam a seleção ao tocar a próxima mídia ou
     # a anterior. Por isso esse controle precisa ser feito.
     def playlistPositionChanged(self, position):
         self.playlistView.setCurrentIndex(self.playlistModel.index(position, 0))
 
 
     # essa função é chamada quando você dá um duplo clique em um item da playlist,
-    # para que esse item possa ser executado.
+    # para que esse item possa ser reproduzido.
     def jump(self, index):
         if index.isValid():
             self.playlist.setCurrentIndex(index.row())
@@ -303,7 +304,7 @@ class MultimediaPlayer(QWidget):
         self.mediaPlayer.play()
 
 
-    # É só por frescura mesmo. Se o primeiro item da lista estiver executando, ao pressionar previous ele executa
+    # É só por frescura mesmo. Se o primeiro item da lista estiver reproduzindo, ao pressionar previous ele executa
     # o último item como se estivesse fazendo o retorno.
     def setPrevious(self):
         if self.playlist.currentIndex() == 0:
@@ -311,8 +312,8 @@ class MultimediaPlayer(QWidget):
         self.playlist.previous()
 
 
-    # Função para parar a execução e também forçar o positionSlider a voltar para o início, pois não é visualmente
-    # aceitável parar a execução e progresso da execução ficar onde está.
+    # Função para parar a reprodução e também forçar o positionSlider a voltar para o início, pois não é
+    # visualmente aceitável parar a execução e progresso da execução ficar onde está.
     def setStop(self):
         self.mediaPlayer.stop()
         self.positionSlider.setMaximum(0)
@@ -321,7 +322,8 @@ class MultimediaPlayer(QWidget):
     # Função necessária para posicionar o tempo de execução no slider que mostra o progresso de execução.
     def positionChanged(self, position):
         if not self.positionSlider.isSliderDown():
-            # Disable the events to prevent updating triggering a setPosition event (can cause stuttering).
+            # Desativando os eventos preventivamente para evitar que a atualização desencadeie um evento
+            # setPosition causando travamentos.
             self.positionSlider.blockSignals(True)
             self.positionSlider.setValue(position)
             self.positionSlider.blockSignals(False)
@@ -388,10 +390,10 @@ class MultimediaPlayer(QWidget):
     def showPlayList(self):
         if self.panelSHPlaylist.isHidden():
             self.panelSHPlaylist.show()
-            self.controlPlaylist = QAction(setIconTheme(self, theme, 'fullscreen'), 'Hide Playlist', self)
+            self.controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), 'Hide Playlist', self)
         else:
             self.panelSHPlaylist.hide()
-            self.controlPlaylist = QAction(setIconTheme(self, theme, 'fullscreen'), 'Show Playlist', self)
+            self.controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), 'Show Playlist', self)
 
         # Refazendo o menu de contexto com as novas alterações
         self.controlPlaylist.triggered.connect(self.showPlayList)
@@ -414,16 +416,32 @@ class MultimediaPlayer(QWidget):
                                 'border: 6px solid #150033;')
 
 
-    # Função especial que vai ser acionada ao pressionar o botão esquerdo do mouse
+    # Função especial que vai ser acionada ao pressionar o botão direito do mouse
     # para exibir o menu de contexto.
     def contextMenuRequested(self, point):
         if not self.isFullScreen():
             self.menu.exec_(self.mapToGlobal(point))
 
 
-    # def mouseReleaseEvent(self, event):
-    #     if event.button() == Qt.RightButton:
-    #         print('foi')
+    # Verificando se o objeto arrastado pode ser solto em nosso aplicativo. Sim, com isso o programa terá
+    # suporte para arrastar e soltar os itens na lista de reprodução.
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+
+    # Função para adicionar os itens arrastados à lista de reprodução.
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            self.playlist.addMedia(QMediaContent(url))
+        self.playlistModel.layoutChanged.emit()
+
+        # Se não tem nada sendo reproduzido no momento, vai ser reproduzido o primeiro dos recém-adicionados.
+        if self.mediaPlayer.state() != QMediaPlayer.PlayingState:
+            i = self.playlist.mediaCount() - len(event.mimeData().urls())
+            self.playlist.setCurrentIndex(i)
+            self.mediaPlayer.play()
+
 
     # def mousePressEvent(self, evt):
     #     self.oldPos = evt.globalPos()
@@ -432,24 +450,6 @@ class MultimediaPlayer(QWidget):
     #     delta = QPoint(evt.globalPos() - self.oldPos)
     #     self.move(self.x() + delta.x(), self.y() + delta.y())
     #     self.oldPos = evt.globalPos()
-
-    # def dragEnterEvent(self, e):
-    #     if e.mimeData().hasUrls():
-    #         e.acceptProposedAction()
-
-    # def dropEvent(self, e):
-    #     for url in e.mimeData().urls():
-    #         self.playlist.addMedia(
-    #             QMediaContent(url)
-    #         )
-    #
-    #     self.model.layoutChanged.emit()
-    #
-    #     # If not playing, seeking to first of newly added + play.
-    #     if self.player.state() != QMediaPlayer.PlayingState:
-    #         i = self.playlist.mediaCount() - len(e.mimeData().urls())
-    #         self.playlist.setCurrentIndex(i)
-    #         self.player.play()
 
 
 ########################################################################################################################

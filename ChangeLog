@@ -12,11 +12,16 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
     - Sair do modo tela cheia: Esc.
     - Alterar modo tela cheia: Alt+Enter.
     - Sair do programa: Ctrl+Q.
+    - Play/Pause: P.
+    - Stop: S.
+    - Next: Seta direita.
+    - Previous: Seta esquerda.
  - Recursos:
     - Mostrar e exibir os controles com um clique com o botão
       direito do mouse, no modo tela cheia.
     - Adicionado uma Lista de execução.
     - Suporte ao arquivo m3u.
+    - Suporte a arrastar e soltar itens na lista de reprodução.
  - Controles:
     - Botão Next.
     - Botão Previous.
