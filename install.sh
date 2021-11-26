@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pkgver='1.0'
+pkgver='1.1'
 install_root=${install_root:-""}
 
 set -e
@@ -18,9 +18,9 @@ cp -a ChangeLog LICENSE README.md "$install_root"/usr/doc/omp-"$pkgver"
 cp -Tr src "$install_root"/usr/share/omp
 cp -Tr icons "$install_root"/usr/share/omp/icons
 
-echo "#!/bin/bash
+echo '#!/bin/bash
 cd /usr/share/omp
-python3 OpenMediaPlayer.py" > "$install_root"/usr/bin/omp
+python3 OpenMediaPlayer.py "$@"' > "$install_root"/usr/bin/omp
 
 chmod 755 "$install_root"/usr/bin/omp
 exit 0
