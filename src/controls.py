@@ -49,12 +49,12 @@ class PlayerControls(QWidget):
         # Definição do botão next
         self.nextButton = PushButton(30)
         self.nextButton.setIcon(setIconTheme(self, theme, 'next'))
-        self.nextButton.clicked.connect(self.next)
+        self.nextButton.clicked.connect(self.pressNext)
 
         # Definição do botão previous
         self.previousButton = PushButton(30)
         self.previousButton.setIcon(setIconTheme(self, theme, 'previous'))
-        self.previousButton.clicked.connect(self.previous)
+        self.previousButton.clicked.connect(self.pressPrevious)
 
         # Layout para posicionar os botões definidos
         layout = QHBoxLayout()
@@ -83,7 +83,7 @@ class PlayerControls(QWidget):
             if state == QMediaPlayer.StoppedState:  # Stop
                 self.stopButton.setEnabled(False)
                 self.playButton.setIcon(setIconTheme(self, theme, 'play'))
-                self.main.positionSlider.setValue(0)
+                self.main.positionSlider.setMaximum(0)
                 self.main.startLogo.show()
             elif state == QMediaPlayer.PlayingState:  # Play
                 self.main.startLogo.hide()
@@ -100,3 +100,18 @@ class PlayerControls(QWidget):
             self.play.emit()
         elif self.playerState == QMediaPlayer.PlayingState:
             self.pause.emit()
+
+
+    # Se o cara vai avançar ou voltar uma música, é porque tem a intenção de escutar ela. Então, ao pressionar
+    # um desses botões, foda-se se está pausado ou parado, ele vai tocar e deu.
+    def pressNext(self):
+        self.next.emit()
+        if self.playerState in (QMediaPlayer.StoppedState, QMediaPlayer.PausedState):
+            self.play.emit()
+
+
+    # Mesmo esquema que mencionei acima.
+    def pressPrevious(self):
+        self.previous.emit()
+        if self.playerState in (QMediaPlayer.StoppedState, QMediaPlayer.PausedState):
+            self.play.emit()
