@@ -32,7 +32,8 @@ Therefore, they can be distributed and / or modified within the terms of the *GN
 
 ### Comments
 
-In case of bugs, problems of execution or construction of packages, constructive criticism, among others, please submit a message to one of the contacts below.
+In case of bugs, problems of execution or construction of packages, constructive criticism, among others,
+please submit a message to one of the contacts below.
 
 ### Contact
 
