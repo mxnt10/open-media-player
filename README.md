@@ -12,6 +12,21 @@ Multimedia Player created using python and PyQt5.
 - PyQt5 >= 5.15.5
 - PyUserInput >= 0.1.11
 
+### Supported file formats
+
+| Video      | Audio      | Playlist   |
+|------------|------------|------------|
+| mp4        | mp3        | m3u        |
+| mpg        |            |            |
+| .......... | .......... | .......... |
+
+### Unsupported file formats
+
+| Video      | Audio      | Playlist   |
+|------------|------------|------------|
+| .......... | .......... | .......... |
+*Not mapped*
+
 ### Installation instructions
 
 To install "Open Media player", use the following commands:
