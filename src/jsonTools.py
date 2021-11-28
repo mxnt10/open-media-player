@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 # Import modules
-import json as j
+from json import dump, load
 from logging import warning
 from os import makedirs, remove
 from os.path import expanduser, isdir
@@ -11,7 +11,8 @@ j_folder = expanduser('~/.config/omp')
 j_file = j_folder + '/settings.json'
 
 default_js = {
-  "IconTheme": "system"
+  "playlist": False,
+  "theme": "circle"
 }
 
 
@@ -24,21 +25,21 @@ def checkSettings():
         if not isdir(j_folder):
             makedirs(j_folder)
         with open(j_file, 'w') as jfile:
-            j.dump(default_js, jfile, indent=2)
+            dump(default_js, jfile, indent=2)
 
 
 def set_json(op):
     with open(j_file) as jf:
-        objJson = j.load(jf)
+        objJson = load(jf)
     return objJson[op]
 
 
 def write_json(op, val):
     with open(j_file, 'r') as jf:
-        objJson = j.load(jf)
+        objJson = load(jf)
         objJson[op] = val
 
     # Replace original file
     remove(j_file)
     with open(j_file, 'w') as jf:
-        j.dump(objJson, jf, indent=2)
+        dump(objJson, jf, indent=2)
