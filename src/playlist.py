@@ -66,10 +66,6 @@ class PlaylistModel(QAbstractItemModel):
         self.endResetModel()
 
 
-########################################################################################################################
-# Não avaliados.
-
-
     def beginInsertItems(self, start, end):
         self.beginInsertRows(QModelIndex(), start, end)
 
@@ -82,9 +78,9 @@ class PlaylistModel(QAbstractItemModel):
         self.dataChanged.emit(self.index(start, 0), self.index(end, self.ColumnCount))
 
 
-    def parent(self, child):
-        return QModelIndex()
-
-
-    def playlist(self):
-        return self.m_playlist
+    # def parent(self, child):
+    #     return QModelIndex()
+    #
+    #
+    # def playlist(self):
+    #     return self.m_playlist
