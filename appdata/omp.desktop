@@ -9,5 +9,5 @@ Exec=omp %F
 Icon=omp
 Terminal=false
 Categories=Qt;AudioVideo;Player;Audio;Video;
-MimeType=audio/mp3;audio/x-mp3;video/mpeg;video/mpeg-system;video/x-mpeg;video/mp4;
+MimeType=audio/mp3;audio/x-mp3;video/mpeg;video/mpeg-system;video/x-mpeg;video/mp4;audio/mpegurl;audio/x-mpegurl;
 X-KDE-StartupNotify=false
