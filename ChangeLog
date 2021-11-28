@@ -3,6 +3,36 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
+## [ 1.2 ] - 2021-11-28 #############################################
+
+### Added / Adicionado
+ - Recursos:
+    - Adicionado o recurso de mostrar os controles em modo tela
+      cheia ao movimentar o mouse.
+    - Adicionado um recurso que impede o bloqueio de tela ao
+      reproduzir uma mídia.
+    - Agora é possível arrastar os arquivos multimídia para dentro
+      do reprodutor, para ser adicionado a playlist.
+ - Efeito visual:
+    - O mouse fica oculto ao ser posicionado acima do widget de
+      vídeo, ainda que a logo seja exibida.
+###
+
+### Changed / Modificado
+ - Alguns estilos foram transferidos para arquivos css.
+ - A playlist agora se mantem com a configuração que foi definida,
+   ou seja, se ao iniciar a playlist já vai ser exibida ou não.
+###
+
+### Removed / Removido
+ - Recursos:
+    - A funcionalidade de clique direito para mostrar os controles
+      em modo tela cheia, não se faz mais necessário.
+###
+
+#####################################################################
+
+
 ## [ 1.1 ] - 2021-11-25 #############################################
 
 ### Added / Adicionado

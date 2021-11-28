@@ -70,9 +70,8 @@ class AboutDialog(QDialog):
 
     # Para sair é só dar um clique da janela que já fecha.
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            if self.block == 0:
-                self.close()
+        if self.block == 0:
+            self.close()
         self.block = 0
 
 
