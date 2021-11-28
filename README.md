@@ -14,17 +14,15 @@ Multimedia Player created using python and PyQt5.
 
 ### Supported file formats
 
-| Video      | Audio      | Playlist   |
-|------------|------------|------------|
-| mp4        | mp3        | m3u        |
-| mpg        |            |            |
-| .......... | .......... | .......... |
+| Video    | Audio    | Playlist |
+|----------|----------|----------|
+| mp4      | mp3      | m3u      |
+| mpg      |          |          |
 
 ### Unsupported file formats
 
-| Video      | Audio      | Playlist   |
-|------------|------------|------------|
-| .......... | .......... | .......... |
+| Video    | Audio    | Playlist |
+|----------|----------|----------|
 *Not mapped*
 
 ### Installation instructions
