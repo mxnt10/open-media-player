@@ -24,8 +24,8 @@
 # Formatos Incompatíveis: Não mapeado ainda.
 #
 # Início do desenvolvimento: 14/11/2021
-# Término do desenvolvimento:
-# Última atualização:
+# Término do desenvolvimento: 20/11/2021
+# Última atualização: 28/11/2021
 #
 # Licença: GNU General Public License Version 3 (GLPv3)
 #
@@ -37,11 +37,12 @@
 
 
 # Módulos importados
+from pykeyboard import PyKeyboard  # pip install PyUserInput
 from os.path import dirname
 from sys import argv
 
 # Módulos do PyQt5
-from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo
+from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QVBoxLayout, QAction, QMenu, QHBoxLayout, QShortcut,
@@ -50,8 +51,8 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QVBoxLayout, QA
 # Modulos integrados (src)
 from about import AboutDialog
 from controls import PlayerControls
+from jsonTools import checkSettings, set_json, write_json
 from playlist import PlaylistModel
-from style import styleSheet
 from utils import setIconTheme, setIcon
 from widgets import VideoWidget, PixmapLabel, Slider
 
@@ -71,11 +72,21 @@ class MultimediaPlayer(QWidget):
         self.maximize = False
         self.oldPos = None
 
+        # Hack para enganar o pc, impedindo o bloqueio de tela
+        self.key = PyKeyboard()
+        self.caffeine = 1
+
+        # Temporizador para o hack
+        self.hack = QTimer()
+        self.hack.setInterval(10000)
+        self.hack.timeout.connect(self.runHack)
+        self.hack.start()
+
         # Atribuindo as propriedades da interface principal do programa
         self.setWindowTitle('Open Media Player')
         self.setWindowIcon(QIcon(setIcon()))
         self.setMinimumSize(800, 600)
-        self.setAcceptDrops(True)  # Suporte para arrastar itens ao programa.
+        self.setAcceptDrops(True)  # Suporte para arrastar itens ao programa
         self.center()
 
         # Instrução para habilitar o menu de contexto no Open Media Player. O programa não contará
@@ -104,15 +115,13 @@ class MultimediaPlayer(QWidget):
         self.playlistView.setModel(self.playlistModel)
         self.playlistView.setCurrentIndex(self.playlistModel.index(self.playlist.currentIndex(), 0))
         self.playlistView.activated.connect(self.jump)
-        self.playlistView.setStyleSheet('border: 2px outset #444444;'
-                                        'color: #ffffff;'
-                                        'background: #100022')
+        self.playlistView.setStyleSheet(open('css/playist.css').read())
 
         # Essa aqui é a barra que mostra o progresso da reprodução do arquivo multimídia
         self.positionSlider = Slider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.pointClicked.connect(self.setPosition)
-        self.positionSlider.setStyleSheet(styleSheet())
+        self.positionSlider.setStyleSheet(open('css/progressbar.css').read())
 
         # Layout só para ajustar a barra de progresso de reprodução
         self.positionLayout = QHBoxLayout()
@@ -124,8 +133,7 @@ class MultimediaPlayer(QWidget):
         QHLine = QFrame(self)
         QHLine.setFrameShape(QFrame.HLine)
         QHLine.setFrameShadow(QFrame.Raised)
-        QHLine.setStyleSheet('background: #444444;'
-                             'border: 1px solid #000000')
+        QHLine.setStyleSheet('background: #333333; border: 1px solid #000000')
 
         # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
@@ -185,7 +193,9 @@ class MultimediaPlayer(QWidget):
         self.layout.addWidget(self.panelSHPlaylist, 0, 1)
         self.layout.addWidget(self.panelControl, 1, 0, 1, 2)  # Os layouts dos controles
         self.setLayout(self.layout)
-        self.panelSHPlaylist.hide()
+
+        if not set_json('playlist'):
+            self.panelSHPlaylist.hide()
 
         # Configurações de atalhos de teclado
         self.shortcut1 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
@@ -216,36 +226,14 @@ class MultimediaPlayer(QWidget):
         self.playlist.currentIndexChanged.connect(self.playlistPositionChanged)  # Muda a posição na playlist.
         self.addToPlaylist(playlist)  # Adicionar itens a lista de execução
 
-        # Menu de contexto personalizado para o programa no capricho
-        self.menu = QMenu()
-
-        # Menu para abrir os arquivos de multimídia
-        self.openMenu = QAction(setIconTheme(self, theme, 'folder'), 'Open', self)
-        self.openMenu.setShortcut('Ctrl+O')
-        self.openMenu.triggered.connect(self.openFile)
-
-        # Adicionar e ocultar a playlist
-        self.controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), 'Show Playlist', self)
-        self.controlPlaylist.triggered.connect(self.showPlayList)
-
-        # Menu para abrir a janela de configurações
-        self.fullScreen = QAction(setIconTheme(self, theme, 'fullscreen'), 'FullScreen', self)
-        self.fullScreen.setShortcut('Alt+Enter')
-        self.fullScreen.triggered.connect(self.onFullScreen)
-
-        # Menu para abrir a janela de configurações
-        self.openSettings = QAction(setIconTheme(self, theme, 'settings'), 'Settings', self)
-        self.openSettings.setShortcut('Alt+S')
-
-        # Menu para abrir a janela sobre
-        self.openAbout = QAction(setIconTheme(self, theme, 'about'), 'About', self)
-        self.openAbout.triggered.connect(self.showAbout)
-
-        # Criação do menu de contexto
-        self.contextMenu()
-
 
 ########################################################################################################################
+
+
+    # Função para executar o hack contra o bloqueio
+    def runHack(self):
+        if self.caffeine == 1 & self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            self.key.tap_key(self.key.control_key)
 
 
     # Função usada para abrir arquivos multimídia no programa.
@@ -262,7 +250,7 @@ class MultimediaPlayer(QWidget):
                 url = QUrl.fromLocalFile(fileInfo.absoluteFilePath())
 
                 # Adicionar os itens do arquivo m3u pelo método convencional, é furada. Dependendo da lista
-                # que você aicionar, vai dar zica. Os caracteres não vão reconhecer e aí na hora de adicionar
+                # que você adicionar, vai dar zica. Os caracteres não vão reconhecer e aí na hora de adicionar
                 # os itens do arquivo m3u, vai zoar esses caracteres e o item da lista não será reconhecido.
                 # Por isso, reinventei a roda e fiz essa manobra que funciona.
                 if fileInfo.suffix().lower() == 'm3u':
@@ -369,10 +357,9 @@ class MultimediaPlayer(QWidget):
         if multimediaPlayer.isMaximized():
             self.maximize = True
         QApplication.setOverrideCursor(Qt.BlankCursor)
-        self.showFullScreen()
-        if not self.panelSHPlaylist.isHidden():
-            self.showPlayList()
+        self.panelSHPlaylist.hide()
         self.panelControl.hide()
+        self.showFullScreen()
 
 
     # E esse desabilita a tela cheia.
@@ -384,43 +371,65 @@ class MultimediaPlayer(QWidget):
             if self.maximize:
                 self.showMaximized()
                 self.maximize = False
+            if set_json('playlist'):
+                self.panelSHPlaylist.show()
 
 
     # Mostrar e ocultar a playlist através de menu de contexto.
     def showPlayList(self):
-        if self.panelSHPlaylist.isHidden():
+        if not set_json('playlist'):
             self.panelSHPlaylist.show()
-            self.controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), 'Hide Playlist', self)
+            write_json('playlist', True)
         else:
             self.panelSHPlaylist.hide()
-            self.controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), 'Show Playlist', self)
-
-        # Refazendo o menu de contexto com as novas alterações
-        self.controlPlaylist.triggered.connect(self.showPlayList)
-        self.menu.clear()
-        self.contextMenu()
-
-
-    # Construção do menu de contexto.
-    def contextMenu(self):
-        self.menu.addAction(self.openMenu)
-        self.menu.addSeparator()
-        self.menu.addAction(self.controlPlaylist)
-        self.menu.addAction(self.fullScreen)
-        self.menu.addSeparator()
-        self.menu.addAction(self.openSettings)
-        self.menu.addSeparator()
-        self.menu.addAction(self.openAbout)
-        self.menu.setStyleSheet('background-color: #150033;'
-                                'color: #ffffff;'
-                                'border: 6px solid #150033;')
+            write_json('playlist', False)
 
 
     # Função especial que vai ser acionada ao pressionar o botão direito do mouse
     # para exibir o menu de contexto.
     def contextMenuRequested(self, point):
+        QApplication.setOverrideCursor(Qt.ArrowCursor)
+
+        # Verificação das configurações da lista de reprodução
+        if set_json('playlist') is False:
+            text = 'Show Playlist'
+        else:
+            text = 'Hide Playlist'
+
+        # Menu de contexto personalizado para o programa no capricho
+        menu = QMenu()
+        menu.setStyleSheet(open('css/contextmenu.css').read())
+
+        openMenu = QAction(setIconTheme(self, theme, 'folder'), 'Open', self)
+        openMenu.setShortcut('Ctrl+O')
+        openMenu.triggered.connect(self.openFile)
+
+        controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), text, self)
+        controlPlaylist.triggered.connect(self.showPlayList)
+
+        fullScreen = QAction(setIconTheme(self, theme, 'fullscreen'), 'FullScreen', self)
+        fullScreen.setShortcut('Alt+Enter')
+        fullScreen.triggered.connect(self.onFullScreen)
+
+        openSettings = QAction(setIconTheme(self, theme, 'settings'), 'Settings', self)
+        openSettings.setShortcut('Alt+S')
+
+        openAbout = QAction(setIconTheme(self, theme, 'about'), 'About', self)
+        openAbout.triggered.connect(self.showAbout)
+
+        # Montando o menu de contexto
+        menu.addAction(openMenu)
+        menu.addSeparator()
+        menu.addAction(controlPlaylist)
+        menu.addAction(fullScreen)
+        menu.addSeparator()
+        menu.addAction(openSettings)
+        menu.addSeparator()
+        menu.addAction(openAbout)
+
+        # O menu de contexto não precisa aparecer em modo fullscreen.
         if not self.isFullScreen():
-            self.menu.exec_(self.mapToGlobal(point))
+            menu.exec_(self.mapToGlobal(point))
 
 
     # Verificando se o objeto arrastado pode ser solto em nosso aplicativo. Sim, com isso o programa terá
@@ -443,6 +452,16 @@ class MultimediaPlayer(QWidget):
             self.mediaPlayer.play()
 
 
+    # Para executar ações quando o mouse é movido para dentro do programa.
+    def enterEvent(self, event):
+        self.caffeine = 1  # Ativa o hack para não bloquear a tela.
+
+
+    # Para executar ações quando o mouse é movido para fora do programa.
+    def leaveEvent(self, event):
+        self.caffeine = 0  # Desativa o hack.
+
+
     # def mousePressEvent(self, evt):
     #     self.oldPos = evt.globalPos()
     #
@@ -458,6 +477,7 @@ class MultimediaPlayer(QWidget):
 # início do programa
 
 if __name__ == '__main__':
+    checkSettings()
     openMediaplayer = QApplication(argv)
     multimediaPlayer = MultimediaPlayer(argv[1:])
     # multimediaPlayer.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
