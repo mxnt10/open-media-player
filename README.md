@@ -10,6 +10,7 @@ Multimedia Player created using python and PyQt5.
 
 - python >= 3.6
 - PyQt5 >= 5.15.5
+- PyUserInput >= 0.1.11
 
 ### Installation instructions
 
