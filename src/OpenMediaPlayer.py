@@ -12,16 +12,16 @@
 # O tema padrão vai ter um toque estilo walkman da sony, feito para android.
 #
 # Formatos de vídeos testados:
-#   - mp4
-#   - mpg
+#   - 3gp, avi, mov, mkv, mp4, mpg, mxf, ogg, rmvb, webm.
 #
 # Formatos de áudio testados:
-#   - mp3
+#   - m4a, mp3, opus, wma.
 #
 # Arquivos de playlist testados:
-#   - m3u
+#   - m3u.
 #
-# Formatos Incompatíveis: Não mapeado ainda.
+# Formatos Incompatíveis:
+#   - pls (playlist).
 #
 # Início do desenvolvimento: 14/11/2021
 # Término do desenvolvimento: 20/11/2021

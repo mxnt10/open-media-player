@@ -12,18 +12,24 @@ Multimedia Player created using python and PyQt5.
 - PyQt5 >= 5.15.5
 - PyUserInput >= 0.1.11
 
-### Supported file formats
+### Supported file formats (Tested)
 
-| Video    | Audio    | Playlist |
-|----------|----------|----------|
-| mp4      | mp3      | m3u      |
-| mpg      |          |          |
+- Video: 
+    - 3gp, avi, mov, mkv, mp4, mpg, mxf, ogg, rmvb, webm.
+- Audio:
+    - m4a, mp3, opus, wma.
+- Playlist:
+    - m3u.
 
 ### Unsupported file formats
 
-| Video    | Audio    | Playlist |
-|----------|----------|----------|
-*Not mapped*
+- Video: 
+    - NDA.
+- Audio:
+    - NDA.
+- Playlist:
+    - pls.
+
 
 ### Installation instructions
 
