@@ -1,9 +1,5 @@
 QListView {
-    border: 1px solid #333333;
-    background: #100022;
+    border: 1px solid transparent;
+    background: transparent;
     color: #ffffff;
-}
-
-QScrollBar {
-    background: #100022;
 }
