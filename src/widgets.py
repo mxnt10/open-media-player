@@ -55,26 +55,38 @@ class PushButton(QPushButton):
 
     # Esse evento funciona quando o mouse passa encima dos botões.
     def enterEvent(self, event):
-        self.setIconSize(QSize(self.num + 2, self.num + 2))
+        try:
+            self.setIconSize(QSize(self.num + 2, self.num + 2))
+        except Exception as msg:
+            print(msg)
 
 
     # Já esse funciona ao tirar o mouse de cima dos botões.
     def leaveEvent(self, event):
-        self.setIconSize(QSize(self.num, self.num))
+        try:
+            self.setIconSize(QSize(self.num, self.num))
+        except Exception as msg:
+            print(msg)
 
 
     # Efeito visual ao clicar nos botões. Esse efeito consiste em reduzir os botões em 2px.
     @pyqtSlot()
     def onEffect(self):
         self.__fading_button = self.sender()  # Mapear o sinal do botão a ser alterado
-        self.__fading_button.setIconSize(QSize(self.num - 2, self.num - 2))
+        try:
+            self.__fading_button.setIconSize(QSize(self.num - 2, self.num - 2))
+        except Exception as msg:
+            print(msg)
         QTimer.singleShot(100, self.unEffect)  # Timer do efeito
 
 
     # Para completar o efeito visual ao clicar nos botões. Depois da redução, o tamanho
     # precisa voltar ao normal.
     def unEffect(self):
-        self.__fading_button.setIconSize(QSize(self.num + 2, self.num + 2))
+        try:
+            self.__fading_button.setIconSize(QSize(self.num + 2, self.num + 2))
+        except Exception as msg:
+            print(msg)
         self.__fading_button = None  # Finalizar o estado do botão
 
 
@@ -114,6 +126,7 @@ class PixmapLabel(QLabel):
         if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo.
             if self.control == 0:
                 if self.win.isFullScreen():
+                    self.win.panelSlider.show()
                     self.win.panelControl.show()
                 QApplication.setOverrideCursor(Qt.ArrowCursor)
                 self.control = 1
@@ -123,6 +136,7 @@ class PixmapLabel(QLabel):
     def event(self, event):
         if event.type() == 110:  # Executa ações quando o mouse para de se mexer
             if self.win.isFullScreen():  # Aqui é estou controlando as ações em modo tela cheia
+                self.win.panelSlider.hide()
                 self.win.panelControl.hide()
             QApplication.setOverrideCursor(Qt.BlankCursor)
             self.control = 0
@@ -171,6 +185,7 @@ class VideoWidget(QVideoWidget):
         if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo.
             if self.control == 0:
                 if self.win.isFullScreen():
+                    self.win.panelSlider.show()
                     self.win.panelControl.show()
                 QApplication.setOverrideCursor(Qt.ArrowCursor)
                 self.control = 1
@@ -180,6 +195,7 @@ class VideoWidget(QVideoWidget):
     def event(self, event):
         if event.type() == 110:  # Executa ações quando o mouse para de se mexer
             if self.win.isFullScreen():  # Aqui é estou controlando as ações em modo tela cheia
+                self.win.panelSlider.hide()
                 self.win.panelControl.hide()
             QApplication.setOverrideCursor(Qt.BlankCursor)
             self.control = 0
