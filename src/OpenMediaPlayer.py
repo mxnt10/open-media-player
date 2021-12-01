@@ -45,8 +45,8 @@ from sys import argv
 from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
-from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QVBoxLayout, QAction, QMenu, QHBoxLayout, QShortcut,
-                             QGridLayout, QDesktopWidget, QFrame, QListView)
+from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QAction, QMenu, QHBoxLayout, QShortcut, QGridLayout,
+                             QDesktopWidget, QFrame, QListView)
 
 # Modulos integrados (src)
 from about import AboutDialog
@@ -85,7 +85,7 @@ class MultimediaPlayer(QWidget):
         # Atribuindo as propriedades da interface principal do programa
         self.setWindowTitle('Open Media Player')
         self.setWindowIcon(QIcon(setIcon()))
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(900, 500)
         self.setAcceptDrops(True)  # Suporte para arrastar itens ao programa
         self.center()
 
@@ -123,28 +123,37 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.pointClicked.connect(self.setPosition)
         self.positionSlider.setStyleSheet(open('css/progressbar.css').read())
 
+        # Isso aqui funciona como um conteiner para colorir os layouts dos controles.
+        # Aplicando gradiente na barra de progresso.
+        self.panelSlider = QWidget()
+        self.panelSlider.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #000000, stop: 1 #0b0018);')
+
         # Layout só para ajustar a barra de progresso de reprodução
-        self.positionLayout = QHBoxLayout()
-        self.positionLayout.setContentsMargins(10, 5, 10, 5)
+        self.positionLayout = QHBoxLayout(self.panelSlider)
+        self.positionLayout.setContentsMargins(10, 4, 10, 6)
         self.positionLayout.addWidget(self.positionSlider)
 
-        # Essa aqui cria uma linha horizontal no programa. A função dessa linha é só para
-        # efeito visual mesmo.
-        QHLine = QFrame(self)
-        QHLine.setFrameShape(QFrame.HLine)
-        QHLine.setFrameShadow(QFrame.Raised)
-        QHLine.setStyleSheet('background: #333333; border: 1px solid #000000')
+        # Cria uma linha para melhor delimitação e efeito visual na lista de reprodução.
+        self.line = QFrame()
+        self.line.setFrameShape(QFrame.VLine)
+        self.line.setFrameShadow(QFrame.Raised)
 
         # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
-        self.panelSHPlaylist.setStyleSheet('background: #000000')
         self.panelSHPlaylist.setFixedWidth(300)
+        self.panelSHPlaylist.setStyleSheet('background: qlineargradient('
+                                           'x1: 0, x2: 1, stop: 0 #000000, stop: 1 #100022)')
 
         # Layout só para ajustar as propriedades da playlist
-        self.positionSHPlaylist = QHBoxLayout(self.panelSHPlaylist)
-        self.positionSHPlaylist.setContentsMargins(6, 6, 6, 6)
+        self.positionSHPlaylist = QGridLayout(self.panelSHPlaylist)
+        self.positionSHPlaylist.setContentsMargins(5, 7, 10, 7)
         self.positionSHPlaylist.setSpacing(0)
-        self.positionSHPlaylist.addWidget(self.playlistView)
+        self.positionSHPlaylist.addWidget(self.line, 0, 0)
+        self.positionSHPlaylist.addWidget(self.playlistView, 0, 1)
+
+        # Aplicar gladiente na barra de progresso
+        self.panelControl = QWidget()
+        self.panelControl.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #0b0018, stop: 1 #100022);')
 
         # Widget para aplicar funcionalidades nos controles em playerControls
         self.controls = PlayerControls(self)
@@ -156,23 +165,11 @@ class MultimediaPlayer(QWidget):
         self.controls.stop.connect(self.setStop)
 
         # Layout especial para o ajuste dos controles abaixo do widget de vídeo
-        self.controlLayout = QHBoxLayout()
+        self.controlLayout = QHBoxLayout(self.panelControl)
         self.controlLayout.setContentsMargins(0, 0, 0, 5)
         self.controlLayout.addStretch(1)
         self.controlLayout.addWidget(self.controls)
         self.controlLayout.addStretch(1)  # Esse addStretch adiciona um espaçamento
-
-        # Isso aqui funciona como um conteiner para colorir os layouts dos controles
-        self.panelControl = QWidget()
-        self.panelControl.setStyleSheet('background: #100022')
-
-        # O layout para botar tudo o que é de controle barra e tal, dentro do conteiner
-        self.lay = QVBoxLayout(self.panelControl)
-        self.lay.setContentsMargins(0, 0, 0, 0)
-        self.lay.setSpacing(0)
-        self.lay.addWidget(QHLine)
-        self.lay.addLayout(self.positionLayout)
-        self.lay.addLayout(self.controlLayout)
 
         # Acho legal entrar com uma logo no programa.
         self.startLogo = PixmapLabel(self)
@@ -191,7 +188,8 @@ class MultimediaPlayer(QWidget):
         self.layout.addWidget(self.videoWidget, 0, 0)
         self.layout.addWidget(self.startLogo, 0, 0)
         self.layout.addWidget(self.panelSHPlaylist, 0, 1)
-        self.layout.addWidget(self.panelControl, 1, 0, 1, 2)  # Os layouts dos controles
+        self.layout.addWidget(self.panelSlider, 1, 0, 1, 2)
+        self.layout.addWidget(self.panelControl, 2, 0, 1, 2)
         self.setLayout(self.layout)
 
         if not set_json('playlist'):
@@ -358,6 +356,7 @@ class MultimediaPlayer(QWidget):
             self.maximize = True
         QApplication.setOverrideCursor(Qt.BlankCursor)
         self.panelSHPlaylist.hide()
+        self.panelSlider.hide()
         self.panelControl.hide()
         self.showFullScreen()
 
@@ -366,6 +365,7 @@ class MultimediaPlayer(QWidget):
     def unFullScreen(self):
         if self.isFullScreen():
             QApplication.setOverrideCursor(Qt.ArrowCursor)
+            self.panelSlider.show()
             self.panelControl.show()
             self.showNormal()
             if self.maximize:
