@@ -64,6 +64,10 @@ def defaultSystemIcons(self, icon):
         return self.style().standardIcon(QStyle.SP_MediaSkipForward)
     elif icon == 'previous':
         return self.style().standardIcon(QStyle.SP_MediaSkipBackward)
+    elif icon == 'volume_high':
+        return self.style().standardIcon(QStyle.SP_MediaVolume)
+    elif icon == 'mute':
+        return self.style().standardIcon(QStyle.SP_MediaVolumeMuted)
 
     # Recursos
     elif icon == 'fullscreen':
