@@ -27,7 +27,7 @@ class PlaylistModel(QAbstractItemModel):
         return self.ColumnCount if not parent.isValid() else 0
 
 
-    # Essa é a função responsável pela indexação os itens a lista de reprodução.
+    # Essa é a função responsável pela busca dos itens na lista de reprodução.
     def index(self, row, column, parent=QModelIndex()):
         return self.createIndex(row, column) \
             if self.m_playlist is not None and not parent.isValid() and 0 <= row < self.m_playlist.mediaCount()\
@@ -40,8 +40,8 @@ class PlaylistModel(QAbstractItemModel):
         if index.isValid() and role == Qt.DisplayRole:
             if index.column() == self.Title:
                 location = self.m_playlist.media(index.row()).canonicalUrl()
-                return QFileInfo(location.path()).fileName()  # Retorno da localização do arquivo
-            return self.m_data[index]  # Para a indexação do arquivo à lista
+                return QFileInfo(location.path()).fileName()  # Retorno do nome do arquivo
+            return self.m_data[index]
         return None
 
 
@@ -76,11 +76,3 @@ class PlaylistModel(QAbstractItemModel):
 
     def changeItems(self, start, end):
         self.dataChanged.emit(self.index(start, 0), self.index(end, self.ColumnCount))
-
-
-    # def parent(self, child):
-    #     return QModelIndex()
-    #
-    #
-    # def playlist(self):
-    #     return self.m_playlist
