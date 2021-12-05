@@ -261,6 +261,9 @@ class ClickPlayPause:
             self.timer.start()
 
 
+########################################################################################################################
+
+
 # Lista redimensionável para a playlist, pois assim não precisa ficar sofrendo para reformular o layout tudo
 # de novo e também porque só é preciso que a playlist seja redimensionável.
 class ListView(QListView):
@@ -284,17 +287,16 @@ class ListView(QListView):
 
     # A playlist só direciona com esse treco aqui.
     def minimumSizeHint(self):
-        # noinspection PyBroadException
         try:
             return self._sizeHint
-        except:
-            pass
+        except Exception as msg:
+            print(msg)
 
 
     # Ao pressionar o botão do mouse esquerdo, a playlist poderá ser redimensionada.
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.updateCursor(event.pos()):  # Verifica se o cursor foi atualizado.
+            if self.updateCursor(event.pos()):  # Verifica se o cursor foi atualizado
                 self.startPos = event.pos()
 
 
@@ -308,7 +310,7 @@ class ListView(QListView):
             self.startPos = event.pos()
             self.setMinimumWidth(self.width() + delta.x())  # Forçando o redimensionamento
         elif not event.buttons():
-            self.updateCursor(event.pos())  # Isso aqui precisa para fazer o mouse mudar.
+            self.updateCursor(event.pos())  # Isso aqui precisa para fazer o mouse mudar
 
 
     # Redefine todas as propriedades definidas no redirecionamento.
