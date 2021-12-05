@@ -13,6 +13,7 @@ class PlaylistModel(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super(PlaylistModel, self).__init__(parent)
+        self.m_data = None
         self.m_playlist = None
 
 
@@ -34,7 +35,7 @@ class PlaylistModel(QAbstractItemModel):
             and 0 <= column < self.ColumnCount else QModelIndex()
 
 
-    # Essa função é interessante. Ela coloca o nome os arquivos multimídia na lista. Sem ela a lista fica
+    # Essa função é interessante. Ela coloca o nome dos arquivos multimídia na lista. Sem ela a lista fica
     # sem os nomes dos arquivos.
     def data(self, index, role=Qt.DisplayRole):
         if index.isValid() and role == Qt.DisplayRole:
