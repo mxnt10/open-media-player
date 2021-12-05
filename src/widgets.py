@@ -10,9 +10,9 @@ from pymouse import PyMouse  # pip install PyUserInput
 from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget
+from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle
 
-# Essa variável vai servir para o auxilio do mapeamento de clique único
+# Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
 
 
@@ -24,15 +24,26 @@ state = None
 class Slider(QSlider):
     pointClicked = pyqtSignal(int)  # Pegar o sinal
 
+    def __init__(self, parent=None):
+        super(Slider, self).__init__(parent)
+        self.setStyleSheet(open('css/progressbar.css').read())
 
-    # Evento para mapear o clique no QSlider feito com o botão esquerdo.
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            x = event.pos().x()
-            value = (self.maximum() - self.minimum()) * x / self.width() + self.minimum()
-            self.pointClicked.emit(value)  # Emitindo o valor atual
-        else:
-            return super().mousePressEvent(self, event)
+
+    # Função para alterar o valor da barra de reprodução.
+    def positionToInterval(self, event):
+        value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width())
+        self.setValue(value)
+        self.pointClicked.emit(value)
+
+
+    # Ao clicar na barra de reprodução em qualquer lugar, o valor muda.
+    def mousePressEvent(self, event):
+        self.positionToInterval(event)
+
+
+    # Ao mover a barra de reprodução, o valor muda.
+    def mouseMoveEvent(self, event):
+        self.positionToInterval(event)
 
 
 ########################################################################################################################
@@ -53,7 +64,7 @@ class PushButton(QPushButton):
         self.pressed.connect(self.onEffect)
 
 
-    # Esse evento funciona quando o mouse passa encima dos botões.
+    # Esse evento funciona quando o mouse passa em cima dos botões.
     def enterEvent(self, event):
         try:
             self.setIconSize(QSize(self.num + 2, self.num + 2))
@@ -93,7 +104,7 @@ class PushButton(QPushButton):
 ########################################################################################################################
 
 
-# Resolvi criar uma nova classe para a logo do programa para aproveitar o efeito do
+# Resolvi criar uma classe para a logo do programa para aproveitar o efeito do
 # duplo clique, pois a tela cheia só deve funcionar dessa forma.
 class PixmapLabel(QLabel):
     def __init__(self, win):
@@ -104,7 +115,7 @@ class PixmapLabel(QLabel):
         super(QLabel, self).__init__()
         self.control = 0
 
-        # Temporizador pra ficar mapeando a posição do mouse
+        # Temporizador que fica mapeando a posição do mouse
         self.mouse = PyMouse()
         self.timer = QTimer()
         self.timer.timeout.connect(self.changeMouse)
@@ -135,7 +146,7 @@ class PixmapLabel(QLabel):
     # Usei esse mapeador geral de eventos porque queria pegar evento de quando o mouse para.
     def event(self, event):
         if event.type() == 110:  # Executa ações quando o mouse para de se mexer
-            if self.win.isFullScreen():  # Aqui é estou controlando as ações em modo tela cheia
+            if self.win.isFullScreen():  # Aqui eu estou controlando as ações em modo tela cheia
                 self.win.panelSlider.hide()
                 self.win.panelControl.hide()
             QApplication.setOverrideCursor(Qt.BlankCursor)
@@ -156,7 +167,7 @@ class VideoWidget(QVideoWidget):
         super(VideoWidget, self).__init__()
         self.control = 0
 
-        # Temporizador pra ficar mapeando a posição do mouse
+        # Temporizador que fica mapeando a posição do mouse
         self.mouse = PyMouse()
         self.timer = QTimer()
         self.timer.timeout.connect(self.changeMouse)
@@ -216,7 +227,7 @@ class VideoWidget(QVideoWidget):
 ########################################################################################################################
 
 
-# Cópia descarada da internet, porém com algumas alterações. Apenas com o diferencial de já executar as
+# Cópia descarada do StackOverflow, porém com algumas alterações. Apenas com o diferencial de já executar as
 # opções de executar e pausar. A ação de dois cliques não foi feita dessa forma.
 class ClickPlayPause:
     def __init__(self, win):
@@ -227,7 +238,7 @@ class ClickPlayPause:
 
         self.timer = QTimer()
         self.timer.setInterval(400)  # O segredo da parada
-        self.timer.setSingleShot(True)
+        self.timer.setSingleShot(True)  # Só vai haver um intervalo de tempo
         self.timer.timeout.connect(self.timeout)
         self.click_count = 0
 
