@@ -1,12 +1,12 @@
 
 # Módulos do PyQt5
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QSlider
 
 # Modulos integrados (src)
 from utils import setIconTheme
-from widgets import PushButton
+from widgets import PushButton, Slider
 
 
 ########################################################################################################################
@@ -25,6 +25,8 @@ class PlayerControls(QWidget):
     stop = pyqtSignal()
     next = pyqtSignal()
     previous = pyqtSignal()
+    changeVolume = pyqtSignal(int)
+    changeMuting = pyqtSignal(bool)
 
     def __init__(self, win):
         """
@@ -34,6 +36,7 @@ class PlayerControls(QWidget):
 
         super(PlayerControls, self).__init__()
         self.playerState = QMediaPlayer.StoppedState
+        self.playerMuted = False
 
         # Definição do botão play/pause
         self.playButton = PushButton(48)
@@ -56,6 +59,16 @@ class PlayerControls(QWidget):
         self.previousButton.setIcon(setIconTheme(self, theme, 'previous'))
         self.previousButton.clicked.connect(self.pressPrevious)
 
+        # Botão para o mute
+        self.muteButton = PushButton(30)
+        self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
+        self.muteButton.clicked.connect(self.pressMute)
+
+        # Controle de volume
+        self.volumeSlider = Slider(Qt.Horizontal)
+        self.volumeSlider.setRange(0, 100)
+        self.volumeSlider.pointClicked.connect(self.changeVolume)
+
         # Layout para posicionar os botões definidos
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -63,6 +76,8 @@ class PlayerControls(QWidget):
         layout.addWidget(self.previousButton)
         layout.addWidget(self.playButton)
         layout.addWidget(self.nextButton)
+        layout.addWidget(self.muteButton)
+        layout.addWidget(self.volumeSlider)
         self.setLayout(layout)
 
 
@@ -86,7 +101,6 @@ class PlayerControls(QWidget):
                 self.main.positionSlider.setMaximum(0)
                 self.main.startLogo.show()
             elif state == QMediaPlayer.PlayingState:  # Play
-                self.main.startLogo.hide()
                 self.stopButton.setEnabled(True)
                 self.playButton.setIcon(setIconTheme(self, theme, 'pause'))
             elif state == QMediaPlayer.PausedState:  # Pause
@@ -115,3 +129,43 @@ class PlayerControls(QWidget):
         self.previous.emit()
         if self.playerState in (QMediaPlayer.StoppedState, QMediaPlayer.PausedState):
             self.play.emit()
+
+
+    # Função para retornar o volume para o reprodutor.
+    def volume(self):
+        return self.volumeSlider.value()
+
+
+    # Essa função vai alterar o volume do reprodutor.
+    def setVolume(self, volume):
+        if self.isMuted():
+            self.pressMute()
+        if 0 < volume <= 25:
+            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_low'))
+        elif 25 < volume <= 75:
+            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_medium'))
+        elif volume > 75:
+            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
+        elif volume == 0:
+            self.muteButton.setIcon(setIconTheme(self, theme, 'mute'))
+        self.volumeSlider.setValue(volume)
+
+
+    # Verificando se o programa está mudo.
+    def isMuted(self):
+        return self.playerMuted
+
+
+    # Essa parte vai alterar o estado da saída de áudio, se está no mudo ou não.
+    def setMuted(self, muted):
+        if muted != self.playerMuted:
+            self.playerMuted = muted
+        if muted:
+            self.muteButton.setIcon(setIconTheme(self, theme, 'mute'))
+        elif not muted and self.volumeSlider.value() > 0:
+            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
+
+
+    # Ao clicar no botão mute um sinal é emitido.
+    def pressMute(self):
+        self.changeMuting.emit(not self.playerMuted)
