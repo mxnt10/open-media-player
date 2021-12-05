@@ -2,7 +2,7 @@
 # Módulos do PyQt5
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QSlider
+from PyQt5.QtWidgets import QWidget, QHBoxLayout
 
 # Modulos integrados (src)
 from utils import setIconTheme
