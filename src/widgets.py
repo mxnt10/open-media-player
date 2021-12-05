@@ -7,10 +7,10 @@
 from pymouse import PyMouse  # pip install PyUserInput
 
 # Módulos do PyQt5
-from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal
+from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle
+from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle, QListView
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
@@ -259,3 +259,63 @@ class ClickPlayPause:
         self.click_count += 1
         if not self.timer.isActive():
             self.timer.start()
+
+
+# Lista redimensionável para a playlist, pois assim não precisa ficar sofrendo para reformular o layout tudo
+# de novo e também porque só é preciso que a playlist seja redimensionável.
+class ListView(QListView):
+    resizeMargin = 10
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._sizeHint = QSize(0, 0)
+        self.startPos = self.section = None
+        self.setMouseTracking(True)
+
+
+    # Função para atualizar o cursor ao chegar na borda especificada para redirecionar.
+    def updateCursor(self, pos):
+        if pos.x() < self.resizeMargin:
+            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+            self.section = (1, QRect())
+            return self.section
+        QApplication.setOverrideCursor(Qt.ArrowCursor)
+
+
+    # A playlist só direciona com esse treco aqui.
+    def minimumSizeHint(self):
+        # noinspection PyBroadException
+        try:
+            return self._sizeHint
+        except:
+            pass
+
+
+    # Ao pressionar o botão do mouse esquerdo, a playlist poderá ser redimensionada.
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.updateCursor(event.pos()):  # Verifica se o cursor foi atualizado.
+                self.startPos = event.pos()
+
+
+    # Evento que vai fazer o serviço e redimensionar a playlist.
+    def mouseMoveEvent(self, event):
+        if self.startPos is not None:
+            delta = event.pos()
+            if self.section:
+                delta.setX(-delta.x())
+            self._sizeHint = QSize(self.width() + delta.x(), self.height() + delta.y())
+            self.startPos = event.pos()
+            self.setMinimumWidth(self.width() + delta.x())  # Forçando o redimensionamento
+        elif not event.buttons():
+            self.updateCursor(event.pos())  # Isso aqui precisa para fazer o mouse mudar.
+
+
+    # Redefine todas as propriedades definidas no redirecionamento.
+    def mouseReleaseEvent(self, event):
+        self.startPos = self.section = None
+
+
+    # Só para redefinir o cursor ao posicionar o mouse para fora da playlist.
+    def leaveEvent(self, event):
+        QApplication.setOverrideCursor(Qt.ArrowCursor)
