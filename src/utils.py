@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QStyle
 # Função que vai definir o ícone do programa
 def setIcon(logo=False):
     """
-        :param logo:  Opcional. Se definido como true, vai retornar o logo do programa e não o ícone.
+        :param logo: Opcional. Se definido como true, vai retornar o logo do programa e não o ícone.
         :return:
     """
 
@@ -44,12 +44,12 @@ def setIcon(logo=False):
 
 
 # Essa função tem duas utilidades. Se o tema selecionado for system essa função será usada para a definição dos
-# ícones. E também caso um determinado tema não tenha um determinado ícone em específico. Aí pra não ficar sem
+# ícones. E também caso um determinado tema não tenha um determinado ícone em específico. Aí para não ficar sem
 # ícone usa o do sistema mesmo.
 def defaultSystemIcons(self, icon):
     """
         :param self: Esse parâmetro precisa ser self, pois é o mesmo parâmetro definido em setIconTheme.
-        :param icon: Aqui se específica o ícone que você quer.
+        :param icon: Aqui se específica o ícone que quiser.
         :return:
     """
 
@@ -65,6 +65,10 @@ def defaultSystemIcons(self, icon):
     elif icon == 'previous':
         return self.style().standardIcon(QStyle.SP_MediaSkipBackward)
     elif icon == 'volume_high':
+        return self.style().standardIcon(QStyle.SP_MediaVolume)
+    elif icon == 'volume_medium':
+        return self.style().standardIcon(QStyle.SP_MediaVolume)
+    elif icon == 'volume_low':
         return self.style().standardIcon(QStyle.SP_MediaVolume)
     elif icon == 'mute':
         return self.style().standardIcon(QStyle.SP_MediaVolumeMuted)
@@ -89,7 +93,7 @@ def setIconTheme(self, theme, icon):
     """
         :param self: Esse parâmetro precisa ser self.
         :param theme: Aqui se entra com o nome do tema.
-        :param icon: Aqui se específica o ícone que você quer.
+        :param icon: Aqui se específica o ícone que quiser.
         :return:
     """
     icon_theme = '/usr/share/omp/icons/'
