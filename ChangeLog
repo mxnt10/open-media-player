@@ -3,10 +3,16 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
-## [ 1.3 ] - 2021-11-30 #############################################
+## [ 1.3 ] - 2021-12-05 #############################################
 
 ### Added / Adicionado
- -
+ - Controles:
+    - Adicionado o controle de volume e a opção de mudo.
+ - Recursos:
+    - Playlist redimensionável.
+    - Opção de abrir mais completa.
+ - Efeito Visual:
+    - A logo continua sendo exibida se a mídia for uma música.
 ###
 
 ### Changed / Modificado
@@ -22,6 +28,9 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 ### Fixed / Corrigido
  - Foi adicionado um try/except preventivo para os efeitos dos
    botões.
+ - Corrigido os problemas com a barra de reprodução que não estava
+   funcionando perfeitamente.
+ - Pequenas correções ortográficas nos comentários.
 ###
 
 #####################################################################
