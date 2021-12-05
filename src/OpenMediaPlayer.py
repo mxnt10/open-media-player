@@ -131,7 +131,6 @@ class MultimediaPlayer(QWidget):
         # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
         self.panelSHPlaylist.setMinimumWidth(300)
-        self.panelSHPlaylist.setMaximumWidth(800)
         self.panelSHPlaylist.setStyleSheet('background: qlineargradient('
                                            'x1: 0, x2: 1, stop: 0 #000000, stop: 1 #100022)')
 
@@ -178,7 +177,6 @@ class MultimediaPlayer(QWidget):
 
         # Criando um layout para mostrar o conteiner com os widgets e layouts personalizados
         self.layout = QGridLayout()
-        self.layout.setSpacing(3)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
         self.layout.addWidget(self.videoWidget, 0, 0)

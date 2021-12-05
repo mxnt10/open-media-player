@@ -298,6 +298,7 @@ class ListView(QListView):
         if event.button() == Qt.LeftButton:
             if self.updateCursor(event.pos()):  # Verifica se o cursor foi atualizado
                 self.startPos = event.pos()
+        super().mousePressEvent(event)
 
 
     # Evento que vai fazer o serviço e redimensionar a playlist.
