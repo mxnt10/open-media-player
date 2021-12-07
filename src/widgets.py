@@ -10,7 +10,7 @@ from pymouse import PyMouse  # pip install PyUserInput
 from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle, QListView
+from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle, QListView, QSizePolicy
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
@@ -172,6 +172,9 @@ class VideoWidget(QVideoWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.changeMouse)
         self.timer.start()
+
+        # Correções na política de redirecionamento
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
         # Após o término do vídeo reproduzido, ao tentar executar o vídeo novamente, o fundo não fica mais preto.
         # Esse recurso vai garantir que a cor no fundo do vídeo vai ser preto e deu e tá acabado.

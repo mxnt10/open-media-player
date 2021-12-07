@@ -36,7 +36,7 @@ from os.path import dirname
 from sys import argv
 
 # Módulos do PyQt5
-from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer
+from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer, QEvent
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QAction, QMenu, QHBoxLayout, QShortcut, QGridLayout,
@@ -499,6 +499,17 @@ class MultimediaPlayer(QWidget):
     def leaveEvent(self, event):
         self.caffeine = 0  # Desativa o hack.
 
+    def changeEvent(self, event):
+        if event.type() == QEvent.WindowStateChange:
+            if int(self.windowState()) == 0:  # Restaurar
+                write_json('maximized', False)
+            elif int(self.windowState()) == 1:  # Minimização
+                pass
+            elif int(self.windowState()) == 2:  # Maximização
+                write_json('maximized', True)
+            elif int(self.windowState()) == 3:  # Minimização direta
+                pass
+
 
     # def mousePressEvent(self, evt):
     #     self.oldPos = evt.globalPos()
@@ -519,5 +530,8 @@ if __name__ == '__main__':
     openMediaplayer = QApplication(argv)
     multimediaPlayer = MultimediaPlayer(argv[1:])
     # multimediaPlayer.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-    multimediaPlayer.show()
+    if set_json('maximized') is True:
+        multimediaPlayer.showMaximized()
+    else:
+        multimediaPlayer.show()
     exit(openMediaplayer.exec_())  # Finalização correta do programa

@@ -12,6 +12,7 @@ j_file = j_folder + '/settings.json'
 
 default_js = {
   "playlist": False,
+  "maximized": False,
   "theme": "circle"
 }
 

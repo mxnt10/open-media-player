@@ -9,6 +9,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
  - Controles:
     - Adicionado o controle de volume e a opção de mudo.
  - Recursos:
+    - Inicia maximizado ao fechar maximizado.
     - Playlist redimensionável.
     - Opção de abrir mais completa.
  - Efeito Visual:
