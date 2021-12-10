@@ -7,7 +7,7 @@ QSlider::handle:horizontal {
 }
 
 QSlider::groove:horizontal {
-    background: qlineargradient(y1: 0, y2: 1, stop: 0 #333333, stop: 1.0 #ffffff);
+    background: qlineargradient(y1: 0, y2: 1, stop: 0 #444444, stop: 1.0 #ffffff);
     border: 1px solid #444444;
     border-radius: 2px;
     height: 3px;
@@ -33,10 +33,3 @@ QSlider::handle:horizontal:disabled {
     background: #2a82da;
 }
 
-QLineEdit {
-    background: black;
-    color: #585858;
-    border: 0px solid #076100;
-    font-size: 8pt;
-    font-weight: bold;
-}

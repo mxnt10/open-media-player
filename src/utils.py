@@ -86,6 +86,8 @@ def defaultSystemIcons(self, icon):
         return self.style().standardIcon(QStyle.SP_CustomBase)
     elif icon == 'about':
         return QIcon.fromTheme('help-about')
+    else:
+        return self.style().standardIcon(QStyle.SP_CustomBase)
 
 
 # Função que vai selecionar o tema dos ícones
