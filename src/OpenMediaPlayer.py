@@ -37,7 +37,7 @@ from sys import argv
 
 # Módulos do PyQt5
 from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer, QEvent
-from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
+from PyQt5.QtGui import QKeySequence, QPixmap, QIcon, QMovie
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QAction, QMenu, QHBoxLayout, QShortcut, QGridLayout,
                              QDesktopWidget, QFrame)
@@ -116,7 +116,7 @@ class MultimediaPlayer(QWidget):
         # Isso aqui funciona como um conteiner para colorir os layouts dos controles.
         # Aplicando gradiente na barra de progresso.
         self.panelSlider = QWidget()
-        self.panelSlider.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #000000, stop: 1 #0b0018);')
+        self.panelSlider.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #000000, stop: 1 #070010);')
 
         # Layout só para ajustar a barra de progresso de reprodução
         self.positionLayout = QHBoxLayout(self.panelSlider)
@@ -143,7 +143,7 @@ class MultimediaPlayer(QWidget):
 
         # Aplicar gladiente na barra de progresso
         self.panelControl = QWidget()
-        self.panelControl.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #0b0018, stop: 1 #100022);')
+        self.panelControl.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #070010, stop: 1 #100022);')
 
         # Widget para aplicar funcionalidades nos controles em playerControls
         self.controls = PlayerControls(self)
@@ -170,10 +170,12 @@ class MultimediaPlayer(QWidget):
         self.startLogo.setPixmap(QPixmap(setIcon(logo=True)))
         self.startLogo.setAlignment(Qt.AlignCenter)
 
-        # self.startLogo.setScaledContents(True)
-        # self.movie = QMovie('../gif_view/effects1.gif')
-        # self.startLogo.setMovie(self.movie)
-        # self.movie.start()
+        self.startLogo2 = PixmapLabel(self)
+        self.startLogo2.setAlignment(Qt.AlignCenter)
+        # self.startLogo2.setScaledContents(True)
+        self.movie = QMovie('../gif_view/effects1.gif')
+        self.startLogo2.setMovie(self.movie)
+        self.movie.start()
 
         # Criando um layout para mostrar o conteiner com os widgets e layouts personalizados
         self.layout = QGridLayout()
@@ -198,8 +200,12 @@ class MultimediaPlayer(QWidget):
         self.shortcut3.activated.connect(self.controlFullScreen)
         self.shortcut4 = QShortcut(QKeySequence(Qt.Key_Escape), self)
         self.shortcut4.activated.connect(self.unFullScreen)
-        self.shortcut5 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_Q), self)
-        self.shortcut5.activated.connect(self.close)
+        self.shortcut5 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_H), self)
+        self.shortcut5.activated.connect(self.controls.setShuffle)
+        self.shortcut6 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_T), self)
+        self.shortcut6.activated.connect(self.controls.setReplay)
+        self.shortcut7 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_Q), self)
+        self.shortcut7.activated.connect(self.close)
 
         # Atalhos de teclado dos controles
         self.shortcutC1 = QShortcut(QKeySequence(Qt.Key_P), self)
@@ -449,6 +455,14 @@ class MultimediaPlayer(QWidget):
         fullScreen.setShortcut('Alt+Enter')
         fullScreen.triggered.connect(self.onFullScreen)
 
+        shuffle = QAction(setIconTheme(self, theme, 'shuffle-menu'), 'Shuffle', self)
+        shuffle.setShortcut('Ctrl+H')
+        shuffle.triggered.connect(self.controls.setShuffle)
+
+        replay = QAction(setIconTheme(self, theme, 'replay-menu'), 'Replay', self)
+        replay.setShortcut('Ctrl+T')
+        replay.triggered.connect(self.controls.setReplay)
+
         openSettings = QAction(setIconTheme(self, theme, 'settings'), 'Settings', self)
         openSettings.setShortcut('Alt+S')
 
@@ -460,6 +474,9 @@ class MultimediaPlayer(QWidget):
         menu.addSeparator()
         menu.addAction(controlPlaylist)
         menu.addAction(fullScreen)
+        menu.addSeparator()
+        menu.addAction(shuffle)
+        menu.addAction(replay)
         menu.addSeparator()
         menu.addAction(openSettings)
         menu.addSeparator()
@@ -510,11 +527,10 @@ class MultimediaPlayer(QWidget):
             elif int(self.windowState()) == 3:  # Minimização direta
                 pass
 
-
-    # def mousePressEvent(self, evt):
+    # def mousePressEvent(self, event):
     #     self.oldPos = evt.globalPos()
     #
-    # def mouseMoveEvent(self, evt):
+    # def mouseMoveEvent(self, event):
     #     delta = QPoint(evt.globalPos() - self.oldPos)
     #     self.move(self.x() + delta.x(), self.y() + delta.y())
     #     self.oldPos = evt.globalPos()

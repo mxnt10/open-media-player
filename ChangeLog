@@ -8,6 +8,14 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 ### Added / Adicionado
  - Controles:
     - Adicionado o controle de volume e a opção de mudo.
+    - Adicionado botão aleatório e replay.
+ - Menu de contexto:
+    - Shuffle(Aleatório).
+    - Replay(Repetir).
+    - Settings (Inativo no momento).
+ - Teclas de atalho:
+    - Aleatório: Ctrl+H.
+    - Replay: Ctrl+T.
  - Recursos:
     - Inicia maximizado ao fechar maximizado.
     - Playlist redimensionável.

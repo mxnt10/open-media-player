@@ -1,8 +1,8 @@
 
 # Módulos do PyQt5
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import QWidget, QHBoxLayout
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFrame
 
 # Modulos integrados (src)
 from utils import setIconTheme
@@ -37,6 +37,7 @@ class PlayerControls(QWidget):
         super(PlayerControls, self).__init__()
         self.playerState = QMediaPlayer.StoppedState
         self.playerMuted = False
+        self.statusPlayBack = None
 
         # Definição do botão play/pause
         self.playButton = PushButton(48)
@@ -46,7 +47,6 @@ class PlayerControls(QWidget):
         # Definição do botão stop
         self.stopButton = PushButton(30)
         self.stopButton.setIcon(setIconTheme(self, theme, 'stop'))
-        self.stopButton.setEnabled(False)
         self.stopButton.clicked.connect(self.stop)
 
         # Definição do botão next
@@ -64,20 +64,50 @@ class PlayerControls(QWidget):
         self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
         self.muteButton.clicked.connect(self.pressMute)
 
+        # Botão para o replay
+        self.replayButton = PushButton(30)
+        self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
+        self.replayButton.clicked.connect(self.setReplay)
+
+        # Botão para o shuffle
+        self.shuffleButton = PushButton(30)
+        self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
+        self.shuffleButton.clicked.connect(self.setShuffle)
+
         # Controle de volume
         self.volumeSlider = Slider(Qt.Horizontal)
         self.volumeSlider.setRange(0, 100)
+        self.volumeSlider.setMinimumWidth(100)
         self.volumeSlider.pointClicked.connect(self.changeVolume)
+
+        # divisória para os botões
+        self.line = QFrame()
+        self.line.setFrameShape(QFrame.VLine)
+        self.line.setMaximumHeight(30)
+        self.line.setStyleSheet('background: #ffffff; border: 2px solid #ffffff; border-radius: 1px;')
+
+        # Ajuste do tamanho do espaçamento da linha
+        self.positionline = QHBoxLayout()
+        self.positionline.setContentsMargins(10, 0, 10, 0)
+        self.positionline.addWidget(self.line)
+
+        # Ajuste do espaçamento do controle do volume
+        self.positionvolume = QHBoxLayout()
+        self.positionvolume.setContentsMargins(5, 0, 0, 0)
+        self.positionvolume.addWidget(self.volumeSlider)
 
         # Layout para posicionar os botões definidos
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.shuffleButton)
+        layout.addWidget(self.replayButton)
+        layout.addLayout(self.positionline)
         layout.addWidget(self.stopButton)
         layout.addWidget(self.previousButton)
         layout.addWidget(self.playButton)
         layout.addWidget(self.nextButton)
         layout.addWidget(self.muteButton)
-        layout.addWidget(self.volumeSlider)
+        layout.addLayout(self.positionvolume)
         self.setLayout(layout)
 
 
@@ -96,15 +126,12 @@ class PlayerControls(QWidget):
         if state != self.playerState:
             self.playerState = state
             if state == QMediaPlayer.StoppedState:  # Stop
-                self.stopButton.setEnabled(False)
                 self.playButton.setIcon(setIconTheme(self, theme, 'play'))
                 self.main.positionSlider.setMaximum(0)
                 self.main.startLogo.show()
             elif state == QMediaPlayer.PlayingState:  # Play
-                self.stopButton.setEnabled(True)
                 self.playButton.setIcon(setIconTheme(self, theme, 'pause'))
             elif state == QMediaPlayer.PausedState:  # Pause
-                self.stopButton.setEnabled(True)
                 self.playButton.setIcon(setIconTheme(self, theme, 'play'))
 
 
@@ -169,3 +196,28 @@ class PlayerControls(QWidget):
     # Ao clicar no botão mute um sinal é emitido.
     def pressMute(self):
         self.changeMuting.emit(not self.playerMuted)
+
+
+    # Função para recomeçar a playlist novamente.
+    def setReplay(self):
+        if self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Sequential:
+            self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Loop)
+            self.statusPlayBack = self.main.playlist.playbackMode()
+            self.replayButton.setIcon(setIconTheme(self, theme, 'replay-on'))
+        elif self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Loop:
+            self.statusPlayBack = None
+            self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
+            self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
+
+
+    # Função para reproduzir so arquivos de multimídia de forma aleatória.
+    def setShuffle(self):
+        if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Random:
+            self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Random)
+            self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle-on'))
+        else:
+            if self.statusPlayBack is None:
+                self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
+            else:
+                self.main.playlist.setPlaybackMode(self.statusPlayBack)
+            self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
