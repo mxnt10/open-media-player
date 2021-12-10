@@ -78,6 +78,10 @@ def defaultSystemIcons(self, icon):
         return QIcon.fromTheme('view-fullscreen')
     elif icon == 'playlist':
         return self.style().standardIcon(QStyle.SP_CustomBase)
+    elif icon == 'replay':
+        return self.style().standardIcon(QStyle.SP_BrowserReload)
+    elif icon == 'replay-menu':
+        return self.style().standardIcon(QStyle.SP_BrowserReload)
 
     # Menu
     elif icon == 'folder':
