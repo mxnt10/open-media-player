@@ -13,25 +13,6 @@ Multimedia Player created using python and PyQt5.
 - PyUserInput >= 0.1.11
 - pymediainfo >= 5.1.0
 
-### Supported file formats (Tested)
-
-- Video: 
-    - 3gp, avi, mov, mkv, mp4, mpg, mxf, ogg, rmvb, webm.
-- Audio:
-    - m4a, mp3, opus, wma.
-- Playlist:
-    - m3u.
-
-### Unsupported file formats
-
-- Video: 
-    - NDA.
-- Audio:
-    - NDA.
-- Playlist:
-    - pls.
-
-
 ### Installation instructions
 
 To install "Open Media player", use the following commands:
