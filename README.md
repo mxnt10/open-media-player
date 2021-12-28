@@ -12,6 +12,8 @@ Multimedia Player created using python and PyQt5.
 - PyQt5 >= 5.15.5
 - PyUserInput >= 0.1.11
 - pymediainfo >= 5.1.0
+- libmediainfo >= 21.09
+- libzen >= 0.4.39
 
 ### Installation instructions
 
