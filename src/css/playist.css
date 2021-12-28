@@ -3,3 +3,7 @@ QListView {
     background: transparent;
     color: #ffffff;
 }
+
+QWidget {
+    background: qlineargradient(x1: 0, x2: 1, stop: 0 #000000, stop: 1 #100022);
+}
