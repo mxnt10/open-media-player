@@ -213,7 +213,7 @@ class VideoWidget(QVideoWidget):
                 self.win.panelControl.hide()
             QApplication.setOverrideCursor(Qt.BlankCursor)
             self.control = 0
-        return QWidget.event(self, event)
+        return QVideoWidget.event(self, event)
 
 
     # Clique único para executar ações em modo de tela cheia.
