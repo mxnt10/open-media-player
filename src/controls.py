@@ -127,8 +127,6 @@ class PlayerControls(QWidget):
             self.playerState = state
             if state == QMediaPlayer.StoppedState:  # Stop
                 self.playButton.setIcon(setIconTheme(self, theme, 'play'))
-                self.main.positionSlider.setMaximum(0)
-                self.main.startLogo.show()
             elif state == QMediaPlayer.PlayingState:  # Play
                 self.playButton.setIcon(setIconTheme(self, theme, 'pause'))
             elif state == QMediaPlayer.PausedState:  # Pause
