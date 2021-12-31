@@ -84,7 +84,7 @@ class PlayerControls(QWidget):
         self.line = QFrame()
         self.line.setFrameShape(QFrame.VLine)
         self.line.setMaximumHeight(30)
-        self.line.setStyleSheet('background: #ffffff; border: 2px solid #ffffff; border-radius: 1px;')
+        self.line.setStyleSheet(open('css/controls.css').read())
 
         # Ajuste do tamanho do espaçamento da linha
         self.positionline = QHBoxLayout()
@@ -198,12 +198,11 @@ class PlayerControls(QWidget):
 
     # Função para recomeçar a playlist novamente.
     def setReplay(self):
-        if self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Sequential:
+        if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Loop:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Loop)
-            self.statusPlayBack = self.main.playlist.playbackMode()
             self.replayButton.setIcon(setIconTheme(self, theme, 'replay-on'))
+            self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
         elif self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Loop:
-            self.statusPlayBack = None
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
             self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
 
@@ -213,9 +212,7 @@ class PlayerControls(QWidget):
         if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Random:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Random)
             self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle-on'))
-        else:
-            if self.statusPlayBack is None:
-                self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
-            else:
-                self.main.playlist.setPlaybackMode(self.statusPlayBack)
+            self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
+        elif self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Random:
+            self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
             self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
