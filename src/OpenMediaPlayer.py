@@ -362,7 +362,6 @@ class MultimediaPlayer(QWidget):
         time = QTime(0, 0, 0, 0)
         time = time.addMSecs(self.mediaPlayer.position())
         self.progress.setText(time.toString())
-        self.videoWidget.fitInView(self.videoItem, Qt.KeepAspectRatio)
 
 
     # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider.
@@ -372,6 +371,11 @@ class MultimediaPlayer(QWidget):
         time = QTime(0, 0, 0, 0)
         time = time.addMSecs(self.mediaPlayer.duration())
         self.duration.setText(time.toString())
+        self.videoWidget.fitInView(self.videoItem, Qt.KeepAspectRatio)  # Rendenizando o vídeo
+
+        # Ajustes para a variável progress para a barra de execução não ficar mexendo do lugar
+        size = self.progress.size().width()
+        self.progress.setFixedWidth(size)
 
 
     # A barra vai atualizar ao ocorrer mudanças no valor do tempo de execução.
