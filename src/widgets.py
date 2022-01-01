@@ -8,9 +8,10 @@ from pymouse import PyMouse  # pip install PyUserInput
 
 # Módulos do PyQt5
 from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
+from PyQt5.QtGui import QPainter
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle, QListView, QSizePolicy
+from PyQt5.QtWidgets import (QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle, QListView, QSizePolicy,
+                             QGraphicsView)
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
@@ -158,7 +159,7 @@ class PixmapLabel(QLabel):
 
 
 # Classe para o mapeamento de eventos do mouse e demais configurações no widget de vídeo.
-class VideoWidget(QVideoWidget):
+class VideoWidget(QGraphicsView):
     def __init__(self, win):
         """
             :param win: O parâmetro precisa ser self.
@@ -173,12 +174,15 @@ class VideoWidget(QVideoWidget):
         self.timer.timeout.connect(self.changeMouse)
         self.timer.start()
 
-        # Correções na política de redirecionamento
-        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        # Ajustes de redirecionamento, resolução e cor
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setStyleSheet('background-color: #000000; border: 0')
+        self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.SmoothPixmapTransform)
 
-        # Após o término do vídeo reproduzido, ao tentar executar o vídeo novamente, o fundo não fica mais preto.
-        # Esse recurso vai garantir que a cor no fundo do vídeo vai ser preto e deu e tá acabado.
-        self.setStyleSheet('background-color: #000000')
+        # Como foi usado fitInView vai aparecer uma barra de rolagem desnecessária que será desativada
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.verticalScrollBar().setDisabled(True)
 
         # Mapeador de clique único que já vai executar as ações necessárias após o mapeamento
         self.click_handler = ClickPlayPause(self.win)
@@ -213,7 +217,7 @@ class VideoWidget(QVideoWidget):
                 self.win.panelControl.hide()
             QApplication.setOverrideCursor(Qt.BlankCursor)
             self.control = 0
-        return QVideoWidget.event(self, event)
+        return QGraphicsView.event(self, event)
 
 
     # Clique único para executar ações em modo de tela cheia.
@@ -225,6 +229,11 @@ class VideoWidget(QVideoWidget):
                 state = 1  # Pause
             else:
                 state = 2  # Play
+
+
+    # Como não está sendo usado QVideoWidget, é necessário fazer o redirecionamento.
+    def resizeEvent(self, event):
+        self.win.videoWidget.fitInView(self.win.videoItem, Qt.KeepAspectRatio)
 
 
 ########################################################################################################################
