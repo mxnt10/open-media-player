@@ -4,14 +4,14 @@
 
 
 # Módulos importados
-from pymouse import PyMouse  # pip install PyUserInput
+from logging import warning
 
 # Módulos do PyQt5
 from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
 from PyQt5.QtGui import QPainter
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import (QPushButton, QLabel, QSlider, QApplication, QWidget, QStyle, QListView, QSizePolicy,
-                             QGraphicsView)
+from PyQt5.QtWidgets import (QPushButton, QSlider, QApplication, QStyle, QListView, QSizePolicy, QGraphicsView, QFrame,
+                             QWidget)
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
@@ -88,7 +88,7 @@ class PushButton(QPushButton):
         try:
             self.__fading_button.setIconSize(QSize(self.num - 2, self.num - 2))
         except Exception as msg:
-            print(msg)
+            warning('\033[33m %s.\033[32m', msg)
         QTimer.singleShot(100, self.unEffect)  # Timer do efeito
 
 
@@ -100,177 +100,6 @@ class PushButton(QPushButton):
         except Exception as msg:
             print(msg)
         self.__fading_button = None  # Finalizar o estado do botão
-
-
-########################################################################################################################
-
-
-# Resolvi criar uma classe para a logo do programa para aproveitar o efeito do
-# duplo clique, pois a tela cheia só deve funcionar dessa forma.
-class PixmapLabel(QLabel):
-    def __init__(self, win):
-        """
-            :param win: O parâmetro precisa ser self.
-        """
-        self.win = win
-        super(QLabel, self).__init__()
-        self.control = 0
-
-        # Temporizador que fica mapeando a posição do mouse
-        self.mouse = PyMouse()
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.changeMouse)
-        self.timer.start()
-
-
-    # Duplo clique para ativar e desativar o modo de tela cheia.
-    def mouseDoubleClickEvent(self, event):
-        if self.win.isFullScreen() & event.button() == Qt.LeftButton:
-            self.win.unFullScreen()
-        else:
-            self.win.onFullScreen()
-        self.control = 0
-
-
-    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem.
-    def changeMouse(self):
-        x = self.mouse.position()[0]
-        if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo.
-            if self.control == 0:
-                if self.win.isFullScreen():
-                    self.win.panelSlider.show()
-                    self.win.panelControl.show()
-                QApplication.setOverrideCursor(Qt.ArrowCursor)
-                self.control = 1
-
-
-    # Usei esse mapeador geral de eventos porque queria pegar evento de quando o mouse para.
-    def event(self, event):
-        if event.type() == 110:  # Executa ações quando o mouse para de se mexer
-            if self.win.isFullScreen():  # Aqui eu estou controlando as ações em modo tela cheia
-                self.win.panelSlider.hide()
-                self.win.panelControl.hide()
-            QApplication.setOverrideCursor(Qt.BlankCursor)
-            self.control = 0
-        return QWidget.event(self, event)
-
-
-########################################################################################################################
-
-
-# Classe para o mapeamento de eventos do mouse e demais configurações no widget de vídeo.
-class VideoWidget(QGraphicsView):
-    def __init__(self, win):
-        """
-            :param win: O parâmetro precisa ser self.
-        """
-        self.win = win
-        super(VideoWidget, self).__init__()
-        self.control = 0
-
-        # Temporizador que fica mapeando a posição do mouse
-        self.mouse = PyMouse()
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.changeMouse)
-        self.timer.start()
-
-        # Ajustes de redirecionamento, resolução e cor
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.setStyleSheet('background-color: #000000; border: 0')
-        self.setRenderHints(QPainter.Antialiasing | QPainter.HighQualityAntialiasing | QPainter.SmoothPixmapTransform)
-
-        # Como foi usado fitInView vai aparecer uma barra de rolagem desnecessária que será desativada
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.verticalScrollBar().setDisabled(True)
-
-        # Mapeador de clique único que já vai executar as ações necessárias após o mapeamento
-        self.click_handler = ClickPlayPause(self.win)
-
-
-    # Duplo clique para ativar e desativar o modo de tela cheia.
-    def mouseDoubleClickEvent(self, event):
-        if self.win.isFullScreen() & event.button() == Qt.LeftButton:
-            self.win.unFullScreen()
-        else:
-            self.win.onFullScreen()
-        self.control = 0
-
-
-    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem.
-    def changeMouse(self):
-        x = self.mouse.position()[0]
-        if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo.
-            if self.control == 0:
-                if self.win.isFullScreen():
-                    self.win.panelSlider.show()
-                    self.win.panelControl.show()
-                QApplication.setOverrideCursor(Qt.ArrowCursor)
-                self.control = 1
-
-
-    # Usei esse mapeador geral de eventos porque queria pegar evento de quando o mouse para.
-    def event(self, event):
-        if event.type() == 110:  # Executa ações quando o mouse para de se mexer
-            if self.win.isFullScreen():  # Aqui é estou controlando as ações em modo tela cheia
-                self.win.panelSlider.hide()
-                self.win.panelControl.hide()
-            QApplication.setOverrideCursor(Qt.BlankCursor)
-            self.control = 0
-        return QGraphicsView.event(self, event)
-
-
-    # Clique único para executar ações em modo de tela cheia.
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:  # Ação para Executar e pausar com o botão esquerdo
-            global state
-            self.click_handler()  # Iniciando a escuta
-            if self.win.mediaPlayer.state() == QMediaPlayer.PlayingState:
-                state = 1  # Pause
-            else:
-                state = 2  # Play
-
-
-    # Como não está sendo usado QVideoWidget, é necessário fazer o redirecionamento.
-    def resizeEvent(self, event):
-        self.win.videoWidget.fitInView(self.win.videoItem, Qt.KeepAspectRatio)
-
-
-########################################################################################################################
-
-
-# Cópia descarada do StackOverflow, porém com algumas alterações. Apenas com o diferencial de já executar as
-# opções de executar e pausar. A ação de dois cliques não foi feita dessa forma.
-class ClickPlayPause:
-    def __init__(self, win):
-        self.win = win
-        """
-            :param win: O parâmetro precisa ser self.win.
-        """
-
-        self.timer = QTimer()
-        self.timer.setInterval(400)  # O segredo da parada
-        self.timer.setSingleShot(True)  # Só vai haver um intervalo de tempo
-        self.timer.timeout.connect(self.timeout)
-        self.click_count = 0
-
-
-    # Em 400ms essa função é acionada e se em 400ms teve mais de um clique,
-    # ele vai executar as ações de executar ou pausar.
-    def timeout(self):
-        if self.click_count == 1:
-            if state == 1:
-                self.win.mediaPlayer.pause()
-            if state == 2:
-                self.win.mediaPlayer.play()
-        self.click_count = 0
-
-
-    # Carinha que faz a escuta e vai contando os cliques.
-    def __call__(self):
-        self.click_count += 1
-        if not self.timer.isActive():
-            self.timer.start()
 
 
 ########################################################################################################################
@@ -334,3 +163,106 @@ class ListView(QListView):
     # Só para redefinir o cursor ao posicionar o mouse para fora da playlist.
     def leaveEvent(self, event):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
+
+
+########################################################################################################################
+
+class Widget(QWidget):
+    enter = pyqtSignal()
+    leave = pyqtSignal()
+    def __init__(self):
+        super(Widget, self).__init__()
+
+    def enterEvent(self, event):
+        self.enter.emit()
+
+    def leaveEvent(self, event):
+        self.leave.emit()
+
+
+########################################################################################################################
+
+
+# Classe para o mapeamento de eventos do mouse e demais configurações no widget de vídeo.
+class VideoWidget(QGraphicsView):
+    def __init__(self, win):
+        """
+            :param win: O parâmetro precisa ser self.
+        """
+        self.win = win
+        super(VideoWidget, self).__init__()
+
+        # Cor de fundo
+        color = self.palette()
+        color.setColor(self.backgroundRole(), Qt.black)
+        self.setPalette(color)
+
+        # Demais ajustes
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setFrameShape(QFrame.NoFrame)  # Tira a borda
+
+        # Melhorar qualidade e resolução
+        self.setRenderHints(QPainter.Antialiasing |
+                            QPainter.HighQualityAntialiasing |
+                            QPainter.SmoothPixmapTransform)
+
+        # Como foi usado fitInView vai aparecer uma barra de rolagem desnecessária que será desativada
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.verticalScrollBar().setDisabled(True)
+
+        # Mapeador de clique único que já vai executar as ações necessárias após o mapeamento
+        self.click_handler = ClickPlayPause(self.win)
+
+
+    # Clique único para executar ações em modo de tela cheia.
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:  # Ação para Executar e pausar com o botão esquerdo
+            global state
+            self.click_handler()  # Iniciando a escuta
+            if self.win.mediaPlayer.state() == QMediaPlayer.PlayingState:
+                state = 1  # Pause
+            else:
+                state = 2  # Play
+
+
+    # Como não está sendo usado QVideoWidget, é necessário fazer o redirecionamento.
+    def resizeEvent(self, event):
+        self.win.videoWidget.fitInView(self.win.videoItem, Qt.KeepAspectRatio)
+
+
+########################################################################################################################
+
+
+# Cópia descarada do StackOverflow, porém com algumas alterações. Apenas com o diferencial de já executar as
+# opções de executar e pausar. A ação de dois cliques não foi feita dessa forma.
+class ClickPlayPause:
+    def __init__(self, win):
+        self.win = win
+        """
+            :param win: O parâmetro precisa ser self.win.
+        """
+
+        self.timer = QTimer()
+        self.timer.setInterval(400)  # O segredo da parada
+        self.timer.setSingleShot(True)  # Só vai haver um intervalo de tempo
+        self.timer.timeout.connect(self.timeout)
+        self.click_count = 0
+
+
+    # Em 400ms essa função é acionada e se em 400ms teve mais de um clique,
+    # ele vai executar as ações de executar ou pausar.
+    def timeout(self):
+        if self.click_count == 1:
+            if state == 1:
+                self.win.mediaPlayer.pause()
+            if state == 2:
+                self.win.mediaPlayer.play()
+        self.click_count = 0
+
+
+    # Carinha que faz a escuta e vai contando os cliques.
+    def __call__(self):
+        self.click_count += 1
+        if not self.timer.isActive():
+            self.timer.start()
