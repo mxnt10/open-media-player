@@ -12,13 +12,10 @@
 # Dependências:
 #   — PyQt5
 #   — PyUserInput
-#   — pymediainfo
-#   — libmediainfo
-#   — libzen
 #
 # Início do desenvolvimento: 14/11/2021
 # Término do desenvolvimento: 20/11/2021
-# Última atualização: 02/12/2021
+# Última atualização: 01/01/2022
 #
 # Licença: GNU General Public License Version 3 (GLPv3)
 #
@@ -31,16 +28,16 @@
 
 # Módulos importados
 from pykeyboard import PyKeyboard  # pip install PyUserInput
-from pymediainfo import MediaInfo  # pip install pymediainfo
 from os.path import dirname
 from sys import argv
 
 # Módulos do PyQt5
-from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer, QEvent
+from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer, QEvent, QTime, pyqtSlot
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon, QMovie
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
+from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QAction, QMenu, QHBoxLayout, QShortcut, QGridLayout,
-                             QDesktopWidget, QFrame)
+                             QDesktopWidget, QFrame, QLabel, QGraphicsScene)
 
 # Modulos integrados (src)
 from about import AboutDialog
@@ -89,12 +86,18 @@ class MultimediaPlayer(QWidget):
 
         # Criar widgets para a visualização do vídeo e playlist
         self.videoWidget = VideoWidget(self)
+        self.videoItem = QGraphicsVideoItem()
+        self.scene = QGraphicsScene(self.videoWidget)
+        self.scene.addItem(self.videoItem)
+        self.videoWidget.setScene(self.scene)
         self.playlist = QMediaPlaylist()
 
         # Parte principal do programa. O mediaPlayer vai ser definido com a engine QMediaPlayer que
         # irá fazer a reprodução de arquivos multimídia.
         self.mediaPlayer = QMediaPlayer()
-        self.mediaPlayer.setVideoOutput(self.videoWidget)
+        self.mediaPlayer.mediaStatusChanged.connect(self.mediaData)
+        self.mediaPlayer.stateChanged.connect(self.setAction)
+        self.mediaPlayer.setVideoOutput(self.videoItem)
         self.mediaPlayer.setPlaylist(self.playlist)
 
         # Necessário para o funcionamento a playlist
@@ -113,17 +116,25 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.setRange(0, 0)
         self.positionSlider.pointClicked.connect(self.setPosition)
 
+        # Labels para cuidar do tempo de duração e o progresso de execução do arquivo multimídia
+        self.progress = QLabel()
+        self.progress.setText('--:--')
+        self.duration = QLabel()
+        self.duration.setText('--:--')
+
         # Isso aqui funciona como um conteiner para colorir os layouts dos controles.
         # Aplicando gradiente na barra de progresso.
         self.panelSlider = QWidget()
-        self.panelSlider.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #000000, stop: 1 #070010);')
+        self.panelSlider.setStyleSheet('background: #000000')
 
         # Layout só para ajustar a barra de progresso de reprodução
         self.positionLayout = QHBoxLayout(self.panelSlider)
-        self.positionLayout.setContentsMargins(10, 4, 10, 6)
+        self.positionLayout.setContentsMargins(5, 2, 5, 2)
+        self.positionLayout.addWidget(self.progress)
         self.positionLayout.addWidget(self.positionSlider)
+        self.positionLayout.addWidget(self.duration)
 
-        # Cria uma linha para melhor delimitação e efeito visual na lista de reprodução.
+        # Cria uma linha para melhor delimitação e efeito visual na lista de reprodução
         self.line = QFrame()
         self.line.setFrameShape(QFrame.VLine)
         self.line.setFrameShadow(QFrame.Raised)
@@ -131,8 +142,7 @@ class MultimediaPlayer(QWidget):
         # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
         self.panelSHPlaylist.setMinimumWidth(300)
-        self.panelSHPlaylist.setStyleSheet('background: qlineargradient('
-                                           'x1: 0, x2: 1, stop: 0 #000000, stop: 1 #100022)')
+        self.panelSHPlaylist.setStyleSheet(open('css/playist.css').read())
 
         # Layout só para ajustar as propriedades da playlist
         self.positionSHPlaylist = QGridLayout(self.panelSHPlaylist)
@@ -143,7 +153,7 @@ class MultimediaPlayer(QWidget):
 
         # Aplicar gladiente na barra de progresso
         self.panelControl = QWidget()
-        self.panelControl.setStyleSheet('background: qlineargradient(y1: 0, y2: 1, stop: 0 #070010, stop: 1 #100022);')
+        self.panelControl.setStyleSheet(open('css/controls.css').read())
 
         # Widget para aplicar funcionalidades nos controles em playerControls
         self.controls = PlayerControls(self)
@@ -160,12 +170,12 @@ class MultimediaPlayer(QWidget):
 
         # Layout especial para o ajuste dos controles abaixo do widget de vídeo
         self.controlLayout = QHBoxLayout(self.panelControl)
-        self.controlLayout.setContentsMargins(0, 0, 0, 5)
+        self.controlLayout.setContentsMargins(0, 0, 0, 8)
         self.controlLayout.addStretch(1)
         self.controlLayout.addWidget(self.controls)
         self.controlLayout.addStretch(1)  # Esse addStretch adiciona um espaçamento
 
-        # Acho legal entrar com uma logo no programa.
+        # Acho legal entrar com uma logo no programa
         self.startLogo = PixmapLabel(self)
         self.startLogo.setPixmap(QPixmap(setIcon(logo=True)))
         self.startLogo.setAlignment(Qt.AlignCenter)
@@ -212,9 +222,9 @@ class MultimediaPlayer(QWidget):
         self.shortcutC1.activated.connect(self.controls.pressPlay)
         self.shortcutC2 = QShortcut(QKeySequence(Qt.Key_S), self)
         self.shortcutC2.activated.connect(self.setStop)
-        self.shortcutC3 = QShortcut(QKeySequence(Qt.Key_Right), self)
+        self.shortcutC3 = QShortcut(QKeySequence(Qt.Key_Down), self)
         self.shortcutC3.activated.connect(self.controls.pressNext)
-        self.shortcutC4 = QShortcut(QKeySequence(Qt.Key_Left), self)
+        self.shortcutC4 = QShortcut(QKeySequence(Qt.Key_Up), self)
         self.shortcutC4.activated.connect(self.controls.pressPrevious)
 
         # Demais ações
@@ -230,37 +240,48 @@ class MultimediaPlayer(QWidget):
 ########################################################################################################################
 
 
-    # Função para executar o hack contra o bloqueio
+
+    # Ação a ser executada após alterar o estado de execução. Nesse caso, a logo será exibida ao parar a execução.
+    @pyqtSlot(QMediaPlayer.State)
+    def setAction(self, state):
+        if state == QMediaPlayer.StoppedState:
+            self.startLogo.show()
+
+
+    # Função para executar o hack contra o bloqueio.
     def runHack(self):
         if self.caffeine == 1 & self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.key.tap_key(self.key.control_key)
 
 
+    # Função que será usada para a extração de informações dos arquivos multimídia.
+    def mediaData(self):
+        # Aqui, o widget de vídeo só vai ser liberado se o arquivo multimídia for um vídeo. Não precisa esconder a
+        # logo se o arquivo a ser reproduzido for um áudio.
+        if self.mediaPlayer.state() == 1:
+            if self.mediaPlayer.metaData('VideoCodec') is not None:
+                self.startLogo.hide()
+            elif self.mediaPlayer.metaData('AudioCodec') is not None:
+                self.startLogo.show()
+
+
     # Função usada para abrir arquivos multimídia no programa.
     def openFile(self):
-        files, _ = QFileDialog.getOpenFileNames(self, "Open Multimedia Files", QDir.homePath(),
-                                                'Video Files (*.3gp *.3gpp *.m4v *.mp4 *.m2v *.mp2 *.mpeg *.mpg *.vob '
-                                                '*.ogg *.ogv *.mov *.rmvb *.webm *.flv *.mkv *.wmv *.avi *.divx);;'
-                                                'Audio Files (*.ac3 *.flac *.mid *.midi *.m4a *.mp3 *.opus *.mka '
-                                                '*.wma *.wav);;3GPP Multimedia Files (*.3ga *.3gp *.3gpp);;'
-                                                '3GPP2 Multimedia Files (*.3g2 *.3gp2 *.3gpp2);;'
-                                                'MPEG-4 Video (*.f4v *.lrv *.m4v *.mp4);;'
-                                                'MPEG Video (*.m2v *.mp2 *.mpe *.mpeg *.mpg *.ts *.vob *.vdr);;'
-                                                'AVI Video (*.avf *.avi *.divx);;OGG Video (*.ogg *.ogv);;'
-                                                'QuickTime Video (*.moov *.mov *.qt *.qtvr);;'
-                                                'RealMedia Format (*.rv *.rvx *.rmvb);;'
-                                                'WebM Video (*.webm);;Flash Video (*.flv);;'
-                                                'Matroska Video (*.mkv);;Microsoft Media Format (*.wmp);;'
-                                                'Windows Media Video (*.wmv);;'
-                                                'AAC Audio (*.aac *.adts *.ass );;'
-                                                'Dolby Digital Audio (*.ac3);;FLAC Audio (*.flac);;'
-                                                'MIDI Audio (*.kar *.mid *.midi);;'
-                                                'MPEG-4 Audio (*.f4a *.m4a);;MP3 Audio (*.mp3 *.mpga);;'
-                                                'OGG Audio (*.oga *.opus *.spx);;'
-                                                'Matroska Audio (*.mka);;Windows Media Audio (*.wma);;'
-                                                'WAV Audio (*.wav);;WavPack Audio (*.wp *.wvp);;'
-                                                'Media Playlist (*.m3u *.m3u8);;'
-                                                'All Files (*);;')
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "Open Multimedia Files", QDir.homePath(),
+            'Video Files (*.3gp *.3gpp *.m4v *.mp4 *.m2v *.mp2 *.mpeg *.mpg *.vob *.ogg *.ogv *.mov *.rmvb *.webm '
+            '*.flv *.mkv *.wmv *.avi *.divx);;'
+            'Audio Files (*.ac3 *.flac *.mid *.midi *.m4a *.mp3 *.opus *.mka *.wma *.wav);;'
+            '3GPP Multimedia Files (*.3ga *.3gp *.3gpp);;3GPP2 Multimedia Files (*.3g2 *.3gp2 *.3gpp2);;'
+            'AVI Video (*.avf *.avi *.divx);;Flash Video (*.flv);;Matroska Video (*.mkv);;'
+            'Microsoft Media Format (*.wmp);;MPEG Video (*.m2v *.mp2 *.mpe *.mpeg *.mpg *.ts *.vob *.vdr);;'
+            'MPEG-4 Video (*.f4v *.lrv *.m4v *.mp4);;OGG Video (*.ogg *.ogv);;'
+            'QuickTime Video (*.moov *.mov *.qt *.qtvr);;RealMedia Format (*.rv *.rvx *.rmvb);;'
+            'WebM Video (*.webm);;Windows Media Video (*.wmv);;'
+            'AAC Audio (*.aac *.adts *.ass );;Dolby Digital Audio (*.ac3);;FLAC Audio (*.flac);;'
+            'Matroska Audio (*.mka);;MIDI Audio (*.kar *.mid *.midi);;MPEG-4 Audio (*.f4a *.m4a);;'
+            'MP3 Audio (*.mp3 *.mpga);;OGG Audio (*.oga *.opus *.spx);;Windows Media Audio (*.wma);;'
+            'WAV Audio (*.wav);;WavPack Audio (*.wp *.wvp);;Media Playlist (*.m3u *.m3u8);;All Files (*);;')
         self.addToPlaylist(files)
 
 
@@ -297,27 +318,8 @@ class MultimediaPlayer(QWidget):
     # a anterior. Por isso esse controle precisa ser feito.
     def playlistPositionChanged(self, position):
         self.playlistView.setCurrentIndex(self.playlistModel.index(position, 0))
-        self.detectVideo()
-
-
-    # Aqui, o widget de vídeo só vai ser liberado se o arquivo multimídia for um vídeo. Não precisa esconder a
-    # logo se o arquivo a ser reproduzido for um áudio.
-    def detectVideo(self):
         if self.playlist.currentIndex() != (-1):
             location = self.playlist.media(self.playlist.currentIndex()).canonicalUrl()
-            media_info = MediaInfo.parse(location.path())
-            isVideo = False
-
-            # Verificação do arquivo a ser reproduzido
-            for track in media_info.tracks:
-                if track.track_type == "Video":
-                    isVideo = True
-
-            # O vídeo só será liberado se a mídia for vídeo
-            if isVideo:
-                self.startLogo.hide()
-            else:
-                self.startLogo.show()
 
 
     # Essa função é chamada quando é dado um duplo clique num item da playlist,
@@ -357,12 +359,19 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.blockSignals(True)
         self.positionSlider.setValue(position)
         self.positionSlider.blockSignals(False)
+        time = QTime(0, 0, 0, 0)
+        time = time.addMSecs(self.mediaPlayer.position())
+        self.progress.setText(time.toString())
+        self.videoWidget.fitInView(self.videoItem, Qt.KeepAspectRatio)
 
 
     # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider.
     def durationChanged(self, duration):
         self.getduration = duration
         self.positionSlider.setMaximum(duration)
+        time = QTime(0, 0, 0, 0)
+        time = time.addMSecs(self.mediaPlayer.duration())
+        self.duration.setText(time.toString())
 
 
     # A barra vai atualizar ao ocorrer mudanças no valor do tempo de execução.
