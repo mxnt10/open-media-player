@@ -11,7 +11,7 @@ from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
 from PyQt5.QtGui import QPainter
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import (QPushButton, QSlider, QApplication, QStyle, QListView, QSizePolicy, QGraphicsView, QFrame,
-                             QWidget)
+                             QWidget, QHBoxLayout)
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
@@ -163,21 +163,6 @@ class ListView(QListView):
     # Só para redefinir o cursor ao posicionar o mouse para fora da playlist.
     def leaveEvent(self, event):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
-
-
-########################################################################################################################
-
-class Widget(QWidget):
-    enter = pyqtSignal()
-    leave = pyqtSignal()
-    def __init__(self):
-        super(Widget, self).__init__()
-
-    def enterEvent(self, event):
-        self.enter.emit()
-
-    def leaveEvent(self, event):
-        self.leave.emit()
 
 
 ########################################################################################################################
