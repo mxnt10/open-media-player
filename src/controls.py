@@ -5,6 +5,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFrame
 
 # Modulos integrados (src)
+from jsonTools import set_json
 from utils import setIconTheme
 from widgets import PushButton, Slider
 
@@ -12,14 +13,13 @@ from widgets import PushButton, Slider
 ########################################################################################################################
 
 
-theme = 'circle'
-
 # Widget para a definição dos controles usados pelo reprodutor multimídia. Achei mais conveniente fazer assim,
 # conforme nos exemplos tirados do qt5, pois assim o código não vai virar uma bagunça, porque senão daqui a pouco
 # o cara não entende mais nada do que colocou no código.
 
 class PlayerControls(QWidget):
     # Captura o sinal dos botões e dos controles
+    eventPoint = pyqtSignal(int)
     play = pyqtSignal()
     pause = pyqtSignal()
     stop = pyqtSignal()
@@ -38,40 +38,41 @@ class PlayerControls(QWidget):
         self.playerState = QMediaPlayer.StoppedState
         self.playerMuted = False
         self.statusPlayBack = None
+        self.theme = set_json('theme')
 
         # Definição do botão play/pause
         self.playButton = PushButton(48)
-        self.playButton.setIcon(setIconTheme(self, theme, 'play'))
+        self.playButton.setIcon(setIconTheme(self, self.theme, 'play'))
         self.playButton.clicked.connect(self.pressPlay)
 
         # Definição do botão stop
         self.stopButton = PushButton(30)
-        self.stopButton.setIcon(setIconTheme(self, theme, 'stop'))
+        self.stopButton.setIcon(setIconTheme(self, self.theme, 'stop'))
         self.stopButton.clicked.connect(self.stop)
 
         # Definição do botão next
         self.nextButton = PushButton(30)
-        self.nextButton.setIcon(setIconTheme(self, theme, 'next'))
+        self.nextButton.setIcon(setIconTheme(self, self.theme, 'next'))
         self.nextButton.clicked.connect(self.pressNext)
 
         # Definição do botão previous
         self.previousButton = PushButton(30)
-        self.previousButton.setIcon(setIconTheme(self, theme, 'previous'))
+        self.previousButton.setIcon(setIconTheme(self, self.theme, 'previous'))
         self.previousButton.clicked.connect(self.pressPrevious)
 
         # Botão para o mute
         self.muteButton = PushButton(30)
-        self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
+        self.muteButton.setIcon(setIconTheme(self, self.theme, 'volume_high'))
         self.muteButton.clicked.connect(self.pressMute)
 
         # Botão para o replay
         self.replayButton = PushButton(30)
-        self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
+        self.replayButton.setIcon(setIconTheme(self, self.theme, 'replay'))
         self.replayButton.clicked.connect(self.setReplay)
 
         # Botão para o shuffle
         self.shuffleButton = PushButton(30)
-        self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
+        self.shuffleButton.setIcon(setIconTheme(self, self.theme, 'shuffle'))
         self.shuffleButton.clicked.connect(self.setShuffle)
 
         # Controle de volume
@@ -99,6 +100,7 @@ class PlayerControls(QWidget):
         # Layout para posicionar os botões definidos
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.addStretch(1)
         layout.addWidget(self.shuffleButton)
         layout.addWidget(self.replayButton)
         layout.addLayout(self.positionline)
@@ -108,6 +110,7 @@ class PlayerControls(QWidget):
         layout.addWidget(self.nextButton)
         layout.addWidget(self.muteButton)
         layout.addLayout(self.positionvolume)
+        layout.addStretch(1)  # Esse addStretch adiciona um espaçamento
         self.setLayout(layout)
 
 
@@ -126,11 +129,11 @@ class PlayerControls(QWidget):
         if state != self.playerState:
             self.playerState = state
             if state == QMediaPlayer.StoppedState:  # Stop
-                self.playButton.setIcon(setIconTheme(self, theme, 'play'))
+                self.playButton.setIcon(setIconTheme(self, self.theme, 'play'))
             elif state == QMediaPlayer.PlayingState:  # Play
-                self.playButton.setIcon(setIconTheme(self, theme, 'pause'))
+                self.playButton.setIcon(setIconTheme(self, self.theme, 'pause'))
             elif state == QMediaPlayer.PausedState:  # Pause
-                self.playButton.setIcon(setIconTheme(self, theme, 'play'))
+                self.playButton.setIcon(setIconTheme(self, self.theme, 'play'))
 
 
     # Essa é a instrução que vai fazer o botão de play/pause e stop funcionar adequadamente.
@@ -166,13 +169,13 @@ class PlayerControls(QWidget):
         if self.isMuted():
             self.pressMute()
         if 0 < volume <= 25:
-            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_low'))
+            self.muteButton.setIcon(setIconTheme(self, self.theme, 'volume_low'))
         elif 25 < volume <= 75:
-            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_medium'))
+            self.muteButton.setIcon(setIconTheme(self, self.theme, 'volume_medium'))
         elif volume > 75:
-            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
+            self.muteButton.setIcon(setIconTheme(self, self.theme, 'volume_high'))
         elif volume == 0:
-            self.muteButton.setIcon(setIconTheme(self, theme, 'mute'))
+            self.muteButton.setIcon(setIconTheme(self, self.theme, 'mute'))
         self.volumeSlider.setValue(volume)
 
 
@@ -186,9 +189,9 @@ class PlayerControls(QWidget):
         if muted != self.playerMuted:
             self.playerMuted = muted
         if muted:
-            self.muteButton.setIcon(setIconTheme(self, theme, 'mute'))
+            self.muteButton.setIcon(setIconTheme(self, self.theme, 'mute'))
         elif not muted and self.volumeSlider.value() > 0:
-            self.muteButton.setIcon(setIconTheme(self, theme, 'volume_high'))
+            self.muteButton.setIcon(setIconTheme(self, self.theme, 'volume_high'))
 
 
     # Ao clicar no botão mute um sinal é emitido.
@@ -200,19 +203,29 @@ class PlayerControls(QWidget):
     def setReplay(self):
         if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Loop:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Loop)
-            self.replayButton.setIcon(setIconTheme(self, theme, 'replay-on'))
-            self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
+            self.replayButton.setIcon(setIconTheme(self, self.theme, 'replay-on'))
+            self.shuffleButton.setIcon(setIconTheme(self, self.theme, 'shuffle'))
         elif self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Loop:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
-            self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
+            self.replayButton.setIcon(setIconTheme(self, self.theme, 'replay'))
 
 
     # Função para reproduzir so arquivos de multimídia de forma aleatória.
     def setShuffle(self):
         if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Random:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Random)
-            self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle-on'))
-            self.replayButton.setIcon(setIconTheme(self, theme, 'replay'))
+            self.shuffleButton.setIcon(setIconTheme(self, self.theme, 'shuffle-on'))
+            self.replayButton.setIcon(setIconTheme(self, self.theme, 'replay'))
         elif self.main.playlist.playbackMode() == QMediaPlaylist.PlaybackMode.Random:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Sequential)
-            self.shuffleButton.setIcon(setIconTheme(self, theme, 'shuffle'))
+            self.shuffleButton.setIcon(setIconTheme(self, self.theme, 'shuffle'))
+
+
+    # Emissão feita ao passar o mouse nos controles.
+    def enterEvent(self, event):
+        self.eventPoint.emit(1)
+
+
+    # Emissão feita ao retirar o mouse dos controles.
+    def leaveEvent(self, event):
+        self.eventPoint.emit(2)
