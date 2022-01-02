@@ -4,21 +4,15 @@
 # Módulos do PyQt5
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPixmap, QKeySequence
-from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QShortcut
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QShortcut
 
 # Modulos integrados (src)
 from utils import setIcon
 from version import __version__
+from widgets import Label
 
 
 ########################################################################################################################
-
-
-# Somente para não pegar a borda da janela. Método mais econômico.
-class Label(QLabel):
-    def __init__(self, parent=None):
-        super(Label, self).__init__(parent)
-        self.setStyleSheet('border: 0')
 
 
 # Dispensa comentários.
