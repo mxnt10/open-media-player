@@ -11,7 +11,7 @@ from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
 from PyQt5.QtGui import QPainter
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWidgets import (QPushButton, QSlider, QApplication, QStyle, QListView, QSizePolicy, QGraphicsView, QFrame,
-                             QWidget, QHBoxLayout)
+                             QLabel)
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
@@ -20,10 +20,32 @@ state = None
 ########################################################################################################################
 
 
+# Não tem utilidade nenhuma a não ser impedir a ocultação dos controles ao posicianar o mouse nos textos
+# que mostram o tempo de duração e execução de um arquivo multimídia.
+class Label(QLabel):
+    eventPoint = pyqtSignal(int)
+    def __init__(self, parent=None):
+        super(Label, self).__init__(parent)
+        self.setStyleSheet('border: 0')
+
+    # Emissão feita ao passar o mouse nos controles.
+    def enterEvent(self, event):
+        self.eventPoint.emit(1)
+
+
+    # Emissão feita ao retirar o mouse dos controles.
+    def leaveEvent(self, event):
+        self.eventPoint.emit(2)
+
+
+########################################################################################################################
+
+
 # QSlider personalizado para funcionar quando você clica nele. É muito mais conveniente do que mover
 # a barra deslizante para a posição desejada.
 class Slider(QSlider):
-    pointClicked = pyqtSignal(int)  # Pegar o sinal
+    eventPoint = pyqtSignal(int)
+    pointClicked = pyqtSignal(int)
 
     def __init__(self, parent=None):
         super(Slider, self).__init__(parent)
@@ -45,6 +67,16 @@ class Slider(QSlider):
     # Ao mover a barra de reprodução, o valor muda.
     def mouseMoveEvent(self, event):
         self.positionToInterval(event)
+
+
+    # Emissão feita ao passar o mouse nos controles.
+    def enterEvent(self, event):
+        self.eventPoint.emit(1)
+
+
+    # Emissão feita ao retirar o mouse dos controles.
+    def leaveEvent(self, event):
+        self.eventPoint.emit(2)
 
 
 ########################################################################################################################

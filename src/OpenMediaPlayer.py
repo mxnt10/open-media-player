@@ -28,12 +28,13 @@
 
 # Módulos importados
 from pykeyboard import PyKeyboard  # pip install PyUserInput
+from pymouse import PyMouse        # pip install PyUserInput
 from os.path import dirname
 from sys import argv
 
 # Módulos do PyQt5
 from PyQt5.QtCore import Qt, QDir, QUrl, QPoint, QFileInfo, QTimer, QEvent, QTime, pyqtSlot
-from PyQt5.QtGui import QKeySequence, QPixmap, QIcon, QMovie
+from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QMediaPlaylist
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QAction, QMenu, QHBoxLayout, QShortcut, QGridLayout,
@@ -45,21 +46,20 @@ from controls import PlayerControls
 from jsonTools import checkSettings, set_json, write_json
 from playlist import PlaylistModel
 from utils import setIconTheme, setIcon
-from widgets import VideoWidget, PixmapLabel, Slider, ListView
-
-########################################################################################################################
+from widgets import VideoWidget, Slider, ListView, Label
 
 
-theme = 'circle'
+# Classe Principal #####################################################################################################
+
 
 # Foi usado QWidget ao invés de QMainWindow, senão não funciona a visualização do widget de vídeo.
 # Essa classe cria a interface principal que irá fazer a reprodução dos arquivos multimídia.
-
 class MultimediaPlayer(QWidget):
     def __init__(self, playlist, parent=None):
         super(MultimediaPlayer, self).__init__(parent)
-        self.getduration = 0
-        self.maximize = False
+        self.getduration = self.control = 0
+        self.theme = set_json('theme')
+        self.maximize = self.block = False
         self.oldPos = None
 
         # Hack para enganar o PC, impedindo o bloqueio de tela
@@ -72,12 +72,23 @@ class MultimediaPlayer(QWidget):
         self.hack.timeout.connect(self.runHack)
         self.hack.start()
 
+        # Temporizador que fica mapeando a posição do mouse
+        self.mouse = PyMouse()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.changeMouse)
+        self.timer.start()
+
         # Atribuindo as propriedades da interface principal do programa
         self.setWindowTitle('Open Media Player')
         self.setWindowIcon(QIcon(setIcon()))
         self.setMinimumSize(800, 600)
         self.setAcceptDrops(True)  # Suporte para arrastar itens ao programa
         self.center()
+
+        # Cor de fundo
+        color = self.palette()
+        color.setColor(self.backgroundRole(), Qt.black)
+        self.setPalette(color)
 
         # Instrução para habilitar o menu de contexto no Open Media Player. O programa não contará
         # com uma barra de menu habilitada por padrão, então será usado menu de contexto.
@@ -115,19 +126,19 @@ class MultimediaPlayer(QWidget):
         self.positionSlider = Slider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.pointClicked.connect(self.setPosition)
+        self.positionSlider.eventPoint.connect(self.changeBlock)
 
         # Labels para cuidar do tempo de duração e o progresso de execução do arquivo multimídia
-        self.progress = QLabel()
+        self.progress = Label()
+        self.duration = Label()
         self.progress.setText('--:--')
-        self.duration = QLabel()
         self.duration.setText('--:--')
+        self.progress.eventPoint.connect(self.changeBlock)
+        self.duration.eventPoint.connect(self.changeBlock)
 
         # Isso aqui funciona como um conteiner para colorir os layouts dos controles.
         # Aplicando gradiente na barra de progresso.
         self.panelSlider = QWidget()
-        self.panelSlider.setStyleSheet('background: #000000')
-
-        # Layout só para ajustar a barra de progresso de reprodução
         self.positionLayout = QHBoxLayout(self.panelSlider)
         self.positionLayout.setContentsMargins(5, 2, 5, 2)
         self.positionLayout.addWidget(self.progress)
@@ -145,15 +156,11 @@ class MultimediaPlayer(QWidget):
         self.panelSHPlaylist.setStyleSheet(open('css/playist.css').read())
 
         # Layout só para ajustar as propriedades da playlist
-        self.positionSHPlaylist = QGridLayout(self.panelSHPlaylist)
+        self.positionSHPlaylist = QHBoxLayout(self.panelSHPlaylist)
         self.positionSHPlaylist.setContentsMargins(5, 7, 10, 0)
         self.positionSHPlaylist.setSpacing(0)
-        self.positionSHPlaylist.addWidget(self.line, 0, 0)
-        self.positionSHPlaylist.addWidget(self.playlistView, 0, 1)
-
-        # Aplicar gladiente na barra de progresso
-        self.panelControl = QWidget()
-        self.panelControl.setStyleSheet(open('css/controls.css').read())
+        self.positionSHPlaylist.addWidget(self.line)
+        self.positionSHPlaylist.addWidget(self.playlistView)
 
         # Widget para aplicar funcionalidades nos controles em playerControls
         self.controls = PlayerControls(self)
@@ -167,25 +174,19 @@ class MultimediaPlayer(QWidget):
         self.controls.stop.connect(self.setStop)
         self.controls.changeVolume.connect(self.mediaPlayer.setVolume)
         self.controls.changeMuting.connect(self.mediaPlayer.setMuted)
+        self.controls.eventPoint.connect(self.changeBlock)
 
-        # Layout especial para o ajuste dos controles abaixo do widget de vídeo
+        # Aplicar gladiente na barra de progresso e ajustar os controles abaixo do widget de vídeo
+        self.panelControl = QWidget()
+        self.panelControl.setStyleSheet(open('css/controls.css').read())
         self.controlLayout = QHBoxLayout(self.panelControl)
         self.controlLayout.setContentsMargins(0, 0, 0, 8)
-        self.controlLayout.addStretch(1)
         self.controlLayout.addWidget(self.controls)
-        self.controlLayout.addStretch(1)  # Esse addStretch adiciona um espaçamento
 
         # Acho legal entrar com uma logo no programa
-        self.startLogo = PixmapLabel(self)
+        self.startLogo = QLabel()
         self.startLogo.setPixmap(QPixmap(setIcon(logo=True)))
         self.startLogo.setAlignment(Qt.AlignCenter)
-
-        self.startLogo2 = PixmapLabel(self)
-        self.startLogo2.setAlignment(Qt.AlignCenter)
-        # self.startLogo2.setScaledContents(True)
-        self.movie = QMovie('../gif_view/effects1.gif')
-        self.startLogo2.setMovie(self.movie)
-        self.movie.start()
 
         # Criando um layout para mostrar o conteiner com os widgets e layouts personalizados
         self.layout = QGridLayout()
@@ -200,6 +201,8 @@ class MultimediaPlayer(QWidget):
 
         if not set_json('playlist'):
             self.panelSHPlaylist.hide()
+            self.panelSlider.hide()
+            self.panelControl.hide()
 
         # Configurações de atalhos de teclado
         self.shortcut1 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
@@ -237,8 +240,7 @@ class MultimediaPlayer(QWidget):
         self.addToPlaylist(playlist)  # Adicionar itens a lista de execução
 
 
-########################################################################################################################
-
+# Funções ##############################################################################################################
 
 
     # Ação a ser executada após alterar o estado de execução. Nesse caso, a logo será exibida ao parar a execução.
@@ -359,9 +361,10 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.blockSignals(True)
         self.positionSlider.setValue(position)
         self.positionSlider.blockSignals(False)
-        time = QTime(0, 0, 0, 0)
-        time = time.addMSecs(self.mediaPlayer.position())
-        self.progress.setText(time.toString())
+        if self.mediaPlayer.state() != QMediaPlayer.StoppedState:
+            time = QTime(0, 0, 0, 0)
+            time = time.addMSecs(self.mediaPlayer.position())
+            self.progress.setText(time.toString())
 
 
     # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider.
@@ -396,6 +399,14 @@ class MultimediaPlayer(QWidget):
     def showAbout():
         about = AboutDialog()
         about.exec_()
+
+
+    # Controle do modo tela cheia feito pelo menu de contexto.
+    @staticmethod
+    def menuFullScreen():
+        m = PyMouse()
+        for i in range(1, 2):
+            m.click(m.position()[0], m.position()[1])
 
 
     # Controle do modo tela cheia feito pelo Alt+Enter.
@@ -448,7 +459,7 @@ class MultimediaPlayer(QWidget):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
 
         # Verificação das configurações da lista de reprodução
-        if set_json('playlist') is False:
+        if not set_json('playlist'):
             text = 'Show Playlist'
         else:
             text = 'Hide Playlist'
@@ -457,29 +468,29 @@ class MultimediaPlayer(QWidget):
         menu = QMenu()
         menu.setStyleSheet(open('css/contextmenu.css').read())
 
-        openMenu = QAction(setIconTheme(self, theme, 'folder'), 'Open', self)
+        openMenu = QAction(setIconTheme(self, self.theme, 'folder'), 'Open', self)
         openMenu.setShortcut('Ctrl+O')
         openMenu.triggered.connect(self.openFile)
 
-        controlPlaylist = QAction(setIconTheme(self, theme, 'playlist'), text, self)
+        controlPlaylist = QAction(setIconTheme(self, self.theme, 'playlist'), text, self)
         controlPlaylist.triggered.connect(self.showPlayList)
 
-        fullScreen = QAction(setIconTheme(self, theme, 'fullscreen'), 'FullScreen', self)
+        fullScreen = QAction(setIconTheme(self, self.theme, 'fullscreen'), 'FullScreen', self)
         fullScreen.setShortcut('Alt+Enter')
-        fullScreen.triggered.connect(self.onFullScreen)
+        fullScreen.triggered.connect(self.menuFullScreen)
 
-        shuffle = QAction(setIconTheme(self, theme, 'shuffle-menu'), 'Shuffle', self)
+        shuffle = QAction(setIconTheme(self, self.theme, 'shuffle-menu'), 'Shuffle', self)
         shuffle.setShortcut('Ctrl+H')
         shuffle.triggered.connect(self.controls.setShuffle)
 
-        replay = QAction(setIconTheme(self, theme, 'replay-menu'), 'Replay', self)
+        replay = QAction(setIconTheme(self, self.theme, 'replay-menu'), 'Replay', self)
         replay.setShortcut('Ctrl+T')
         replay.triggered.connect(self.controls.setReplay)
 
-        openSettings = QAction(setIconTheme(self, theme, 'settings'), 'Settings', self)
+        openSettings = QAction(setIconTheme(self, self.theme, 'settings'), 'Settings', self)
         openSettings.setShortcut('Alt+S')
 
-        openAbout = QAction(setIconTheme(self, theme, 'about'), 'About', self)
+        openAbout = QAction(setIconTheme(self, self.theme, 'about'), 'About', self)
         openAbout.triggered.connect(self.showAbout)
 
         # Montando o menu de contexto
@@ -498,6 +509,17 @@ class MultimediaPlayer(QWidget):
         # O menu de contexto não precisa aparecer em modo fullscreen.
         if not self.isFullScreen():
             menu.exec_(self.mapToGlobal(point))
+
+
+    # Somente para impedir a minimização dos controles ao posicionar o mouse sobre ele.
+    def changeBlock(self, event):
+        if event == 1:
+            self.block = True
+        elif event == 2:
+            self.block = False
+
+
+# Eventos ##############################################################################################################
 
 
     # Verificando se o objeto arrastado pode ser solto no programa. Sim, com isso o programa terá
@@ -522,13 +544,21 @@ class MultimediaPlayer(QWidget):
 
     # Para executar ações quando o mouse é movido para dentro do programa.
     def enterEvent(self, event):
-        self.caffeine = 1  # Ativa o hack para não bloquear a tela.
+        self.caffeine = 1  # Ativa o hack para não bloquear a tela
+        if not set_json('playlist'):
+            self.panelSlider.show()
+            self.panelControl.show()
 
 
     # Para executar ações quando o mouse é movido para fora do programa.
     def leaveEvent(self, event):
-        self.caffeine = 0  # Desativa o hack.
+        self.caffeine = 0  # Desativa o hack
+        if not set_json('playlist'):
+            self.panelSlider.hide()
+            self.panelControl.hide()
 
+
+    # Evento para executar ações ao pressionar os botões da janela.
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
             if int(self.windowState()) == 0:  # Restaurar
@@ -540,9 +570,45 @@ class MultimediaPlayer(QWidget):
             elif int(self.windowState()) == 3:  # Minimização direta
                 pass
 
+
+    # Duplo clique para ativar e desativar o modo de tela cheia.
+    def mouseDoubleClickEvent(self, event):
+        if self.isFullScreen() & event.button() == Qt.LeftButton:
+            self.unFullScreen()
+        else:
+            self.onFullScreen()
+        self.control = 0
+
+
+    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem.
+    def changeMouse(self):
+        x = self.mouse.position()[0]
+        if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo
+            if self.control == 0:
+                if not self.block:
+                    if not set_json('playlist'):
+                        self.panelSlider.show()
+                        self.panelControl.show()
+                    QApplication.setOverrideCursor(Qt.ArrowCursor)
+                    self.control = 1
+
+
+    # Usei esse mapeador geral de eventos porque queria pegar evento de quando o mouse para.
+    def event(self, event):
+        if event.type() == 110:  # Executa ações quando o mouse para de se mexer
+            if not self.block:
+                if not set_json('playlist'):
+                    self.panelSlider.hide()
+                    self.panelControl.hide()
+                QApplication.setOverrideCursor(Qt.BlankCursor)
+                self.control = 0
+        return QWidget.event(self, event)
+
+
     # def mousePressEvent(self, event):
     #     self.oldPos = evt.globalPos()
-    #
+
+
     # def mouseMoveEvent(self, event):
     #     delta = QPoint(evt.globalPos() - self.oldPos)
     #     self.move(self.x() + delta.x(), self.y() + delta.y())
