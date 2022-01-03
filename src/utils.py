@@ -20,7 +20,7 @@ def setIcon(logo=False):
         :return:
     """
 
-    # Por padrão, a função retorna o ícone do programa, a não ser que logo for definida como True.
+    # Por padrão, a função retorna o ícone do programa, a não ser que logo for definida como True
     if logo:
         img = 'logo'
     else:
