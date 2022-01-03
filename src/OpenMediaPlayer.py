@@ -120,7 +120,7 @@ class MultimediaPlayer(QWidget):
         self.playlistView.setModel(self.playlistModel)
         self.playlistView.setCurrentIndex(self.playlistModel.index(self.playlist.currentIndex(), 0))
         self.playlistView.activated.connect(self.jump)
-        self.playlistView.setStyleSheet(open('css/playist.css').read())
+        self.playlistView.setStyleSheet(open('qss/playist.qss').read())
 
         # Essa aqui é a barra que mostra o progresso da reprodução do arquivo multimídia
         self.positionSlider = Slider(Qt.Horizontal)
@@ -153,7 +153,7 @@ class MultimediaPlayer(QWidget):
         # Container só para dar uma corzinha diferente para o layout da playlist
         self.panelSHPlaylist = QWidget()
         self.panelSHPlaylist.setMinimumWidth(300)
-        self.panelSHPlaylist.setStyleSheet(open('css/playist.css').read())
+        self.panelSHPlaylist.setStyleSheet(open('qss/playist.qss').read())
 
         # Layout só para ajustar as propriedades da playlist
         self.positionSHPlaylist = QHBoxLayout(self.panelSHPlaylist)
@@ -178,7 +178,7 @@ class MultimediaPlayer(QWidget):
 
         # Aplicar gladiente na barra de progresso e ajustar os controles abaixo do widget de vídeo
         self.panelControl = QWidget()
-        self.panelControl.setStyleSheet(open('css/controls.css').read())
+        self.panelControl.setStyleSheet(open('qss/controls.qss').read())
         self.controlLayout = QHBoxLayout(self.panelControl)
         self.controlLayout.setContentsMargins(0, 0, 0, 8)
         self.controlLayout.addWidget(self.controls)
@@ -477,7 +477,7 @@ class MultimediaPlayer(QWidget):
 
         # Menu de contexto personalizado para o programa no capricho
         menu = QMenu()
-        menu.setStyleSheet(open('css/contextmenu.css').read())
+        menu.setStyleSheet(open('qss/contextmenu.qss').read())
 
         openMenu = QAction(setIconTheme(self, self.theme, 'folder'), 'Open', self)
         openMenu.setShortcut('Ctrl+O')

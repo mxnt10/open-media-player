@@ -49,7 +49,7 @@ class Slider(QSlider):
 
     def __init__(self, parent=None):
         super(Slider, self).__init__(parent)
-        self.setStyleSheet(open('css/progressbar.css').read())
+        self.setStyleSheet(open('qss/progressbar.qss').read())
 
 
     # Função para alterar o valor da barra de reprodução.

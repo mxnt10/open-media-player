@@ -84,7 +84,7 @@ class PlayerControls(QWidget):
         self.line = QFrame()
         self.line.setFrameShape(QFrame.VLine)
         self.line.setMaximumHeight(30)
-        self.line.setStyleSheet(open('css/controls.css').read())
+        self.line.setStyleSheet(open('qss/controls.qss').read())
 
         # Ajuste do tamanho do espaçamento da linha
         self.positionline = QHBoxLayout()
