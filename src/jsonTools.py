@@ -17,7 +17,8 @@ default_js = {
 }
 
 
-# Função para verificar se o arquivo de configuração está disponível. Caso contrário, ele será criado.
+# Função para verificar se o arquivo de configuração está disponível.
+# Caso contrário, ele será criado.
 def checkSettings():
     try:
         with open(j_file):
@@ -30,20 +31,20 @@ def checkSettings():
             dump(default_js, jfile, indent=2)
 
 
-# Lê um item do arquivo de configuração.
+# Lê um item do arquivo de configuração
 def setJson(op):
     with open(j_file) as jf:
         objJson = load(jf)
     return objJson[op]
 
 
-# Altera uma opção no arquivo de configuração.
+# Altera uma opção no arquivo de configuração
 def writeJson(op, val):
     with open(j_file, 'r') as jf:
         objJson = load(jf)
         objJson[op] = val
 
-    # Substituindo o arquivo original.
+    # Substituindo o arquivo original
     remove(j_file)
     with open(j_file, 'w') as jf:
         dump(objJson, jf, indent=2)
