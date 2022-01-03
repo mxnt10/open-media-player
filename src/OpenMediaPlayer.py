@@ -57,9 +57,9 @@ from widgets import VideoWidget, Slider, ListView, Label
 class MultimediaPlayer(QWidget):
     def __init__(self, playlist, parent=None):
         super(MultimediaPlayer, self).__init__(parent)
+        self.maximize = self.block = self.actMenu = self.sizeCheck = False
         self.getduration = self.control = 0
         self.theme = set_json('theme')
-        self.maximize = self.block = False
         self.oldPos = None
 
         # Hack para enganar o PC, impedindo o bloqueio de tela
@@ -201,8 +201,7 @@ class MultimediaPlayer(QWidget):
 
         if not set_json('playlist'):
             self.panelSHPlaylist.hide()
-            self.panelSlider.hide()
-            self.panelControl.hide()
+            self.hideControls()
 
         # Configurações de atalhos de teclado
         self.shortcut1 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_A), self)
@@ -270,7 +269,7 @@ class MultimediaPlayer(QWidget):
     # Função usada para abrir arquivos multimídia no programa.
     def openFile(self):
         files, _ = QFileDialog.getOpenFileNames(
-            self, "Open Multimedia Files", QDir.homePath(),
+            self, 'Open Multimedia Files', QDir.homePath(),
             'Video Files (*.3gp *.3gpp *.m4v *.mp4 *.m2v *.mp2 *.mpeg *.mpg *.vob *.ogg *.ogv *.mov *.rmvb *.webm '
             '*.flv *.mkv *.wmv *.avi *.divx);;'
             'Audio Files (*.ac3 *.flac *.mid *.midi *.m4a *.mp3 *.opus *.mka *.wma *.wav);;'
@@ -367,6 +366,13 @@ class MultimediaPlayer(QWidget):
             self.progress.setText(time.toString())
 
 
+    # Definindo o tamanho para a variável progress, que vai exibir o progresso de execução.
+    def sizeLabel(self):
+        if not self.sizeCheck:
+            self.progress.setFixedWidth(self.progress.size().width() + 3)
+            self.sizeCheck = True
+
+
     # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider.
     def durationChanged(self, duration):
         self.getduration = duration
@@ -377,8 +383,7 @@ class MultimediaPlayer(QWidget):
         self.videoWidget.fitInView(self.videoItem, Qt.KeepAspectRatio)  # Rendenizando o vídeo
 
         # Ajustes para a variável progress para a barra de execução não ficar mexendo do lugar
-        size = self.progress.size().width()
-        self.progress.setFixedWidth(size)
+        QTimer.singleShot(500, self.sizeLabel)
 
 
     # A barra vai atualizar ao ocorrer mudanças no valor do tempo de execução.
@@ -401,12 +406,16 @@ class MultimediaPlayer(QWidget):
         about.exec_()
 
 
-    # Controle do modo tela cheia feito pelo menu de contexto.
-    @staticmethod
-    def menuFullScreen():
-        m = PyMouse()
-        for i in range(1, 2):
-            m.click(m.position()[0], m.position()[1])
+    # Função para a exibição dos controles.
+    def showControls(self):
+        self.panelSlider.show()
+        self.panelControl.show()
+
+
+    # Função para ocultar os controles.
+    def hideControls(self):
+        self.panelSlider.hide()
+        self.panelControl.hide()
 
 
     # Controle do modo tela cheia feito pelo Alt+Enter.
@@ -415,6 +424,7 @@ class MultimediaPlayer(QWidget):
             self.unFullScreen()
         else:
             self.onFullScreen()
+        self.control = 0
 
 
     # Esses carinhas vão ser executados de dentro de VideoWidget e PixmapLabel. Esse aqui,
@@ -424,8 +434,7 @@ class MultimediaPlayer(QWidget):
             self.maximize = True
         QApplication.setOverrideCursor(Qt.BlankCursor)
         self.panelSHPlaylist.hide()
-        self.panelSlider.hide()
-        self.panelControl.hide()
+        self.hideControls()
         self.showFullScreen()
 
 
@@ -433,20 +442,21 @@ class MultimediaPlayer(QWidget):
     def unFullScreen(self):
         if self.isFullScreen():
             QApplication.setOverrideCursor(Qt.ArrowCursor)
-            self.panelSlider.show()
-            self.panelControl.show()
             self.showNormal()
             if self.maximize:
                 self.showMaximized()
                 self.maximize = False
             if set_json('playlist'):
                 self.panelSHPlaylist.show()
+                self.showControls()
 
 
     # Mostrar e ocultar a playlist através de menu de contexto.
     def showPlayList(self):
         if not set_json('playlist'):
             self.panelSHPlaylist.show()
+            self.panelSlider.show()
+            self.panelControl.show()
             write_json('playlist', True)
         else:
             self.panelSHPlaylist.hide()
@@ -457,6 +467,7 @@ class MultimediaPlayer(QWidget):
     # para exibir o menu de contexto.
     def contextMenuRequested(self, point):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
+        self.actMenu = True
 
         # Verificação das configurações da lista de reprodução
         if not set_json('playlist'):
@@ -477,7 +488,7 @@ class MultimediaPlayer(QWidget):
 
         fullScreen = QAction(setIconTheme(self, self.theme, 'fullscreen'), 'FullScreen', self)
         fullScreen.setShortcut('Alt+Enter')
-        fullScreen.triggered.connect(self.menuFullScreen)
+        fullScreen.triggered.connect(self.controlFullScreen)
 
         shuffle = QAction(setIconTheme(self, self.theme, 'shuffle-menu'), 'Shuffle', self)
         shuffle.setShortcut('Ctrl+H')
@@ -494,21 +505,26 @@ class MultimediaPlayer(QWidget):
         openAbout.triggered.connect(self.showAbout)
 
         # Montando o menu de contexto
-        menu.addAction(openMenu)
-        menu.addSeparator()
-        menu.addAction(controlPlaylist)
-        menu.addAction(fullScreen)
-        menu.addSeparator()
-        menu.addAction(shuffle)
-        menu.addAction(replay)
-        menu.addSeparator()
-        menu.addAction(openSettings)
-        menu.addSeparator()
-        menu.addAction(openAbout)
-
-        # O menu de contexto não precisa aparecer em modo fullscreen.
-        if not self.isFullScreen():
-            menu.exec_(self.mapToGlobal(point))
+        if self.isFullScreen():
+            menu.addAction(openMenu)
+            menu.addSeparator()
+            menu.addAction(fullScreen)
+            menu.addSeparator()
+            menu.addAction(shuffle)
+            menu.addAction(replay)
+        else:
+            menu.addAction(openMenu)
+            menu.addSeparator()
+            menu.addAction(controlPlaylist)
+            menu.addAction(fullScreen)
+            menu.addSeparator()
+            menu.addAction(shuffle)
+            menu.addAction(replay)
+            menu.addSeparator()
+            menu.addAction(openSettings)
+            menu.addSeparator()
+            menu.addAction(openAbout)
+        menu.exec_(self.mapToGlobal(point))
 
 
     # Somente para impedir a minimização dos controles ao posicionar o mouse sobre ele.
@@ -517,6 +533,18 @@ class MultimediaPlayer(QWidget):
             self.block = True
         elif event == 2:
             self.block = False
+
+
+    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem.
+    def changeMouse(self):
+        x = self.mouse.position()[0]
+        if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo
+            if self.control == 0:
+                if not self.block and not self.actMenu:
+                    if not set_json('playlist') or self.isFullScreen():
+                        self.showControls()
+                    QApplication.setOverrideCursor(Qt.ArrowCursor)
+                    self.control = 1
 
 
 # Eventos ##############################################################################################################
@@ -529,36 +557,39 @@ class MultimediaPlayer(QWidget):
             event.acceptProposedAction()
 
 
-    # Função para adicionar os itens arrastados à lista de reprodução.
+    # Função para adicionar os itens arrastados à lista de reprodução
     def dropEvent(self, event):
         for url in event.mimeData().urls():
             self.playlist.addMedia(QMediaContent(url))
         self.playlistModel.layoutChanged.emit()
 
-        # Se não tem nada sendo reproduzido no momento, vai ser reproduzido o primeiro dos recém-adicionados.
+        # Se não tem nada sendo reproduzido no momento, vai ser reproduzido o primeiro dos recém-adicionados
         if self.mediaPlayer.state() != QMediaPlayer.PlayingState:
             i = self.playlist.mediaCount() - len(event.mimeData().urls())
             self.playlist.setCurrentIndex(i)
             self.mediaPlayer.play()
 
 
-    # Para executar ações quando o mouse é movido para dentro do programa.
+    # Para executar ações quando o mouse é movido para dentro do programa
     def enterEvent(self, event):
         self.caffeine = 1  # Ativa o hack para não bloquear a tela
         if not set_json('playlist'):
-            self.panelSlider.show()
-            self.panelControl.show()
+            if self.actMenu:
+                self.hideControls()
+                self.control = 0
+            elif not self.isFullScreen():
+                self.showControls()
+        self.actMenu = False
 
 
-    # Para executar ações quando o mouse é movido para fora do programa.
+    # Para executar ações quando o mouse é movido para fora do programa
     def leaveEvent(self, event):
         self.caffeine = 0  # Desativa o hack
         if not set_json('playlist'):
-            self.panelSlider.hide()
-            self.panelControl.hide()
+            self.hideControls()
 
 
-    # Evento para executar ações ao pressionar os botões da janela.
+    # Evento para executar ações ao pressionar os botões da janela
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
             if int(self.windowState()) == 0:  # Restaurar
@@ -571,60 +602,34 @@ class MultimediaPlayer(QWidget):
                 pass
 
 
-    # Duplo clique para ativar e desativar o modo de tela cheia.
+    # Duplo clique para ativar e desativar o modo de tela cheia
     def mouseDoubleClickEvent(self, event):
-        if self.isFullScreen() & event.button() == Qt.LeftButton:
+        if self.isFullScreen() and event.button() == Qt.LeftButton:
             self.unFullScreen()
-        else:
+        elif not self.block:
             self.onFullScreen()
         self.control = 0
 
 
-    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem.
-    def changeMouse(self):
-        x = self.mouse.position()[0]
-        if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo
-            if self.control == 0:
-                if not self.block:
-                    if not set_json('playlist'):
-                        self.panelSlider.show()
-                        self.panelControl.show()
-                    QApplication.setOverrideCursor(Qt.ArrowCursor)
-                    self.control = 1
-
-
-    # Usei esse mapeador geral de eventos porque queria pegar evento de quando o mouse para.
+    # Usei esse mapeador geral de eventos porque queria pegar evento de quando o mouse para
     def event(self, event):
         if event.type() == 110:  # Executa ações quando o mouse para de se mexer
             if not self.block:
-                if not set_json('playlist'):
-                    self.panelSlider.hide()
-                    self.panelControl.hide()
+                if not set_json('playlist') or self.isFullScreen():
+                    self.hideControls()
                 QApplication.setOverrideCursor(Qt.BlankCursor)
                 self.control = 0
         return QWidget.event(self, event)
-
-
-    # def mousePressEvent(self, event):
-    #     self.oldPos = evt.globalPos()
-
-
-    # def mouseMoveEvent(self, event):
-    #     delta = QPoint(evt.globalPos() - self.oldPos)
-    #     self.move(self.x() + delta.x(), self.y() + delta.y())
-    #     self.oldPos = evt.globalPos()
 
 
 ########################################################################################################################
 
 
 # início do programa
-
 if __name__ == '__main__':
     checkSettings()
     openMediaplayer = QApplication(argv)
     multimediaPlayer = MultimediaPlayer(argv[1:])
-    # multimediaPlayer.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
     if set_json('maximized') is True:
         multimediaPlayer.showMaximized()
     else:
