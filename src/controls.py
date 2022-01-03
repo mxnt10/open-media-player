@@ -26,6 +26,9 @@ class PlayerControls(QWidget):
     previous = pyqtSignal()
     changeVolume = pyqtSignal(int)
     changeMuting = pyqtSignal(bool)
+    replayOne = pyqtSignal()
+    replay = pyqtSignal()
+    shuffle = pyqtSignal()
 
     def __init__(self, win):
         """
