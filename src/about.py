@@ -25,9 +25,7 @@ class AboutDialog(QDialog):
         # Propriedades da janela
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setWindowTitle('About Open Media Player')
-        self.setStyleSheet('background: #000000;'
-                           'color: #ffffff;'
-                           'border: 6px solid #150033')
+        self.setStyleSheet(open('qss/dialog.qss').read())
 
         # Definindo o layout e o título do texto
         title = Label('Open Media Player v' + str(__version__))
