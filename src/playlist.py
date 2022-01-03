@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 # Módulos do PyQt5
 from PyQt5.QtCore import QAbstractItemModel, QModelIndex, QFileInfo, Qt
@@ -6,8 +7,7 @@ from PyQt5.QtCore import QAbstractItemModel, QModelIndex, QFileInfo, Qt
 ########################################################################################################################
 
 
-# Classe de playlist copiada dos projetos de exemplo do pyqt5.
-
+# Classe de playlist copiada dos projetos de exemplo do pyqt5
 class PlaylistModel(QAbstractItemModel):
     Title, ColumnCount = range(2)
 
@@ -17,7 +17,7 @@ class PlaylistModel(QAbstractItemModel):
         self.m_playlist = None
 
 
-    # Esse item, faz uma contagem dos itens da playlist.
+    # Esse item, faz uma contagem dos itens da playlist
     def rowCount(self, parent=QModelIndex()):
         return self.m_playlist.mediaCount() if self.m_playlist is not None and not parent.isValid() else 0
 
@@ -28,7 +28,7 @@ class PlaylistModel(QAbstractItemModel):
         return self.ColumnCount if not parent.isValid() else 0
 
 
-    # Essa é a função responsável pela busca dos itens na lista de reprodução.
+    # Essa é a função responsável pela busca dos itens na lista de reprodução
     def index(self, row, column, parent=QModelIndex()):
         return self.createIndex(row, column) \
             if self.m_playlist is not None and not parent.isValid() and 0 <= row < self.m_playlist.mediaCount()\
@@ -46,7 +46,7 @@ class PlaylistModel(QAbstractItemModel):
         return None
 
 
-    # Função para manipular a lista de reprodução.
+    # Função para manipular a lista de reprodução
     def setPlaylist(self, playlist):
         if self.m_playlist is not None:
             self.m_playlist.mediaAboutToBeInserted.disconnect(self.beginInsertItems)

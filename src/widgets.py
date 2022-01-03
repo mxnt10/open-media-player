@@ -10,8 +10,8 @@ from logging import warning
 from PyQt5.QtCore import QSize, QTimer, pyqtSlot, Qt, pyqtSignal, QRect
 from PyQt5.QtGui import QPainter
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import (QPushButton, QSlider, QApplication, QStyle, QListView, QSizePolicy, QGraphicsView, QFrame,
-                             QLabel)
+from PyQt5.QtWidgets import (QPushButton, QSlider, QApplication, QStyle, QListView, QSizePolicy, QGraphicsView,
+                             QFrame, QLabel)
 
 # Essa variável vai servir para auxiliar o mapeamento de clique único
 state = None
