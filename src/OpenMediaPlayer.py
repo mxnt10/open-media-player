@@ -43,7 +43,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QFileDialog, QAction, QMenu,
 # Modulos integrados (src)
 from about import AboutDialog
 from controls import PlayerControls
-from jsonTools import checkSettings, set_json, write_json
+from jsonTools import checkSettings, setJson, writeJson
 from playlist import PlaylistModel
 from utils import setIconTheme, setIcon
 from widgets import VideoWidget, Slider, ListView, Label
@@ -59,7 +59,7 @@ class MultimediaPlayer(QWidget):
         super(MultimediaPlayer, self).__init__(parent)
         self.maximize = self.block = self.actMenu = self.sizeCheck = False
         self.getduration = self.control = 0
-        self.theme = set_json('theme')
+        self.theme = setJson('theme')
         self.oldPos = None
 
         # Hack para enganar o PC, impedindo o bloqueio de tela
@@ -199,7 +199,7 @@ class MultimediaPlayer(QWidget):
         self.layout.addWidget(self.panelControl, 2, 0, 1, 3)
         self.setLayout(self.layout)
 
-        if not set_json('playlist'):
+        if not setJson('playlist'):
             self.panelSHPlaylist.hide()
             self.hideControls()
 
@@ -446,21 +446,21 @@ class MultimediaPlayer(QWidget):
             if self.maximize:
                 self.showMaximized()
                 self.maximize = False
-            if set_json('playlist'):
+            if setJson('playlist'):
                 self.panelSHPlaylist.show()
                 self.showControls()
 
 
     # Mostrar e ocultar a playlist através de menu de contexto.
     def showPlayList(self):
-        if not set_json('playlist'):
+        if not setJson('playlist'):
             self.panelSHPlaylist.show()
             self.panelSlider.show()
             self.panelControl.show()
-            write_json('playlist', True)
+            writeJson('playlist', True)
         else:
             self.panelSHPlaylist.hide()
-            write_json('playlist', False)
+            writeJson('playlist', False)
 
 
     # Função especial que vai ser acionada ao pressionar o botão direito do mouse
@@ -470,7 +470,7 @@ class MultimediaPlayer(QWidget):
         self.actMenu = True
 
         # Verificação das configurações da lista de reprodução
-        if not set_json('playlist'):
+        if not setJson('playlist'):
             text = 'Show Playlist'
         else:
             text = 'Hide Playlist'
@@ -541,7 +541,7 @@ class MultimediaPlayer(QWidget):
         if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo
             if self.control == 0:
                 if not self.block and not self.actMenu:
-                    if not set_json('playlist') or self.isFullScreen():
+                    if not setJson('playlist') or self.isFullScreen():
                         self.showControls()
                     QApplication.setOverrideCursor(Qt.ArrowCursor)
                     self.control = 1
@@ -573,7 +573,7 @@ class MultimediaPlayer(QWidget):
     # Para executar ações quando o mouse é movido para dentro do programa
     def enterEvent(self, event):
         self.caffeine = 1  # Ativa o hack para não bloquear a tela
-        if not set_json('playlist'):
+        if not setJson('playlist'):
             if self.actMenu:
                 self.hideControls()
                 self.control = 0
@@ -585,7 +585,7 @@ class MultimediaPlayer(QWidget):
     # Para executar ações quando o mouse é movido para fora do programa
     def leaveEvent(self, event):
         self.caffeine = 0  # Desativa o hack
-        if not set_json('playlist'):
+        if not setJson('playlist'):
             self.hideControls()
 
 
@@ -593,11 +593,11 @@ class MultimediaPlayer(QWidget):
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
             if int(self.windowState()) == 0:  # Restaurar
-                write_json('maximized', False)
+                writeJson('maximized', False)
             elif int(self.windowState()) == 1:  # Minimização
                 pass
             elif int(self.windowState()) == 2:  # Maximização
-                write_json('maximized', True)
+                writeJson('maximized', True)
             elif int(self.windowState()) == 3:  # Minimização direta
                 pass
 
@@ -615,7 +615,7 @@ class MultimediaPlayer(QWidget):
     def event(self, event):
         if event.type() == 110:  # Executa ações quando o mouse para de se mexer
             if not self.block:
-                if not set_json('playlist') or self.isFullScreen():
+                if not setJson('playlist') or self.isFullScreen():
                     self.hideControls()
                 QApplication.setOverrideCursor(Qt.BlankCursor)
                 self.control = 0
@@ -630,7 +630,7 @@ if __name__ == '__main__':
     checkSettings()
     openMediaplayer = QApplication(argv)
     multimediaPlayer = MultimediaPlayer(argv[1:])
-    if set_json('maximized') is True:
+    if setJson('maximized') is True:
         multimediaPlayer.showMaximized()
     else:
         multimediaPlayer.show()

@@ -5,7 +5,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFrame
 
 # Modulos integrados (src)
-from jsonTools import set_json
+from jsonTools import setJson
 from utils import setIconTheme
 from widgets import PushButton, Slider
 
@@ -40,7 +40,7 @@ class PlayerControls(QWidget):
         self.playerState = QMediaPlayer.StoppedState
         self.playerMuted = False
         self.statusPlayBack = None
-        self.theme = set_json('theme')
+        self.theme = setJson('theme')
 
         # Definição do botão play/pause
         self.playButton = PushButton(48)

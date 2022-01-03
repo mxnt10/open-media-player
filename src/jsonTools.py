@@ -31,14 +31,14 @@ def checkSettings():
 
 
 # Lê um item do arquivo de configuração.
-def set_json(op):
+def setJson(op):
     with open(j_file) as jf:
         objJson = load(jf)
     return objJson[op]
 
 
 # Altera uma opção no arquivo de configuração.
-def write_json(op, val):
+def writeJson(op, val):
     with open(j_file, 'r') as jf:
         objJson = load(jf)
         objJson[op] = val
