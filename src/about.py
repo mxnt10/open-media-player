@@ -15,14 +15,14 @@ from widgets import Label
 ########################################################################################################################
 
 
-# Dispensa comentários.
+# Dispensa comentários
 class AboutDialog(QDialog):
     def __init__(self):
         super(AboutDialog, self).__init__()
         self.oldPos = None
         self.block = 0
 
-        # Propriedades da janela.
+        # Propriedades da janela
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setWindowTitle('About Open Media Player')
         self.setStyleSheet('background: #000000;'
@@ -62,19 +62,19 @@ class AboutDialog(QDialog):
         self.shortcut2.activated.connect(self.close)
 
 
-    # Para sair é só dar um clique da janela que já fecha.
+    # Para sair é só dar um clique da janela que já fecha
     def mouseReleaseEvent(self, event):
         if self.block == 0:
             self.close()
         self.block = 0
 
 
-    # Isso eu botei por frescura mesmo. Apenas possibilita mover a janela.
+    # Isso eu botei por frescura mesmo. Apenas possibilita mover a janela
     def mousePressEvent(self, event):
         self.oldPos = event.globalPos()
 
 
-    # A funções que faz a mágica e move a janela.
+    # A funções que faz a mágica e move a janela
     def mouseMoveEvent(self, event):
         delta = QPoint(event.globalPos() - self.oldPos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
