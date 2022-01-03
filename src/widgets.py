@@ -28,12 +28,12 @@ class Label(QLabel):
         super(Label, self).__init__(parent)
         self.setStyleSheet('border: 0')
 
-    # Emissão feita ao passar o mouse nos controles.
+    # Emissão feita ao passar o mouse nos controles
     def enterEvent(self, event):
         self.eventPoint.emit(1)
 
 
-    # Emissão feita ao retirar o mouse dos controles.
+    # Emissão feita ao retirar o mouse dos controles
     def leaveEvent(self, event):
         self.eventPoint.emit(2)
 
@@ -52,29 +52,29 @@ class Slider(QSlider):
         self.setStyleSheet(open('qss/progressbar.qss').read())
 
 
-    # Função para alterar o valor da barra de reprodução.
+    # Função para alterar o valor da barra de reprodução
     def positionToInterval(self, event):
         value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width())
         self.setValue(value)
         self.pointClicked.emit(value)
 
 
-    # Ao clicar na barra de reprodução em qualquer lugar, o valor muda.
+    # Ao clicar na barra de reprodução em qualquer lugar, o valor muda
     def mousePressEvent(self, event):
         self.positionToInterval(event)
 
 
-    # Ao mover a barra de reprodução, o valor muda.
+    # Ao mover a barra de reprodução, o valor muda
     def mouseMoveEvent(self, event):
         self.positionToInterval(event)
 
 
-    # Emissão feita ao passar o mouse nos controles.
+    # Emissão feita ao passar o mouse nos controles
     def enterEvent(self, event):
         self.eventPoint.emit(1)
 
 
-    # Emissão feita ao retirar o mouse dos controles.
+    # Emissão feita ao retirar o mouse dos controles
     def leaveEvent(self, event):
         self.eventPoint.emit(2)
 
@@ -82,7 +82,7 @@ class Slider(QSlider):
 ########################################################################################################################
 
 
-# Essa classe controla todos os efeitos dos botões do programa.
+# Essa classe controla todos os efeitos dos botões do programa
 class PushButton(QPushButton):
     def __init__(self, num):
         self.num = num
@@ -97,7 +97,7 @@ class PushButton(QPushButton):
         self.pressed.connect(self.onEffect)
 
 
-    # Esse evento funciona quando o mouse passa em cima dos botões.
+    # Esse evento funciona quando o mouse passa em cima dos botões
     def enterEvent(self, event):
         try:
             self.setIconSize(QSize(self.num + 2, self.num + 2))
@@ -113,7 +113,7 @@ class PushButton(QPushButton):
             print(msg)
 
 
-    # Efeito visual ao clicar nos botões. Esse efeito consiste em reduzir os botões em 2px.
+    # Efeito visual ao clicar nos botões. Esse efeito consiste em reduzir os botões em 2px
     @pyqtSlot()
     def onEffect(self):
         self.__fading_button = self.sender()  # Mapear o sinal do botão a ser alterado
@@ -149,7 +149,7 @@ class ListView(QListView):
         self.setMouseTracking(True)
 
 
-    # Função para atualizar o cursor ao chegar na borda especificada para redirecionar.
+    # Função para atualizar o cursor ao chegar na borda especificada para redirecionar
     def updateCursor(self, pos):
         if pos.x() < self.resizeMargin:
             QApplication.setOverrideCursor(Qt.SizeHorCursor)
@@ -158,7 +158,7 @@ class ListView(QListView):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
 
 
-    # A playlist só direciona com esse treco aqui.
+    # A playlist só direciona com esse treco aqui
     def minimumSizeHint(self):
         try:
             return self._sizeHint
@@ -166,7 +166,7 @@ class ListView(QListView):
             print(msg)
 
 
-    # Ao pressionar o botão do mouse esquerdo, a playlist poderá ser redimensionada.
+    # Ao pressionar o botão do mouse esquerdo, a playlist poderá ser redimensionada
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.updateCursor(event.pos()):  # Verifica se o cursor foi atualizado
@@ -174,7 +174,7 @@ class ListView(QListView):
         super().mousePressEvent(event)
 
 
-    # Evento que vai fazer o serviço e redimensionar a playlist.
+    # Evento que vai fazer o serviço e redimensionar a playlist
     def mouseMoveEvent(self, event):
         if self.startPos is not None:
             delta = event.pos()
@@ -187,12 +187,12 @@ class ListView(QListView):
             self.updateCursor(event.pos())  # Isso aqui precisa para fazer o mouse mudar
 
 
-    # Redefine todas as propriedades definidas no redirecionamento.
+    # Redefine todas as propriedades definidas no redirecionamento
     def mouseReleaseEvent(self, event):
         self.startPos = self.section = None
 
 
-    # Só para redefinir o cursor ao posicionar o mouse para fora da playlist.
+    # Só para redefinir o cursor ao posicionar o mouse para fora da playlist
     def leaveEvent(self, event):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
 
@@ -200,7 +200,7 @@ class ListView(QListView):
 ########################################################################################################################
 
 
-# Classe para o mapeamento de eventos do mouse e demais configurações no widget de vídeo.
+# Classe para o mapeamento de eventos do mouse e demais configurações no widget de vídeo
 class VideoWidget(QGraphicsView):
     def __init__(self, win):
         """
@@ -232,7 +232,7 @@ class VideoWidget(QGraphicsView):
         self.click_handler = ClickPlayPause(self.win)
 
 
-    # Clique único para executar ações em modo de tela cheia.
+    # Clique único para executar ações em modo de tela cheia
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:  # Ação para Executar e pausar com o botão esquerdo
             global state
@@ -243,7 +243,7 @@ class VideoWidget(QGraphicsView):
                 state = 2  # Play
 
 
-    # Como não está sendo usado QVideoWidget, é necessário fazer o redirecionamento.
+    # Como não está sendo usado QVideoWidget, é necessário fazer o redirecionamento
     def resizeEvent(self, event):
         self.win.videoWidget.fitInView(self.win.videoItem, Qt.KeepAspectRatio)
 
@@ -278,7 +278,7 @@ class ClickPlayPause:
         self.click_count = 0
 
 
-    # Carinha que faz a escuta e vai contando os cliques.
+    # Carinha que faz a escuta e vai contando os cliques
     def __call__(self):
         self.click_count += 1
         if not self.timer.isActive():

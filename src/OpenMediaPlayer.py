@@ -249,13 +249,13 @@ class MultimediaPlayer(QWidget):
             self.startLogo.show()
 
 
-    # Função para executar o hack contra o bloqueio.
+    # Função para executar o hack contra o bloqueio
     def runHack(self):
         if self.caffeine == 1 & self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.key.tap_key(self.key.control_key)
 
 
-    # Função que será usada para a extração de informações dos arquivos multimídia.
+    # Função que será usada para a extração de informações dos arquivos multimídia
     def mediaData(self):
         # Aqui, o widget de vídeo só vai ser liberado se o arquivo multimídia for um vídeo. Não precisa esconder a
         # logo se o arquivo a ser reproduzido for um áudio.
@@ -266,7 +266,7 @@ class MultimediaPlayer(QWidget):
                 self.startLogo.show()
 
 
-    # Função usada para abrir arquivos multimídia no programa.
+    # Função usada para abrir arquivos multimídia no programa
     def openFile(self):
         files, _ = QFileDialog.getOpenFileNames(
             self, 'Open Multimedia Files', QDir.homePath(),
@@ -286,7 +286,7 @@ class MultimediaPlayer(QWidget):
         self.addToPlaylist(files)
 
 
-    # Esse recurso vai adicionar os itens a lista de execução do programa.
+    # Esse recurso vai adicionar os itens a lista de execução do programa
     def addToPlaylist(self, fileNames):
         for name in fileNames:
             fileInfo = QFileInfo(name)
@@ -353,7 +353,7 @@ class MultimediaPlayer(QWidget):
         self.positionSlider.setMaximum(0)
 
 
-    # Função necessária para posicionar o tempo de execução no slider que mostra o progresso de execução.
+    # Função necessária para posicionar o tempo de execução no slider que mostra o progresso de execução
     def positionChanged(self, position):
         # Desativando os eventos preventivamente para evitar que a atualização desencadeie um evento
         # setPosition causando travamentos.
@@ -366,14 +366,14 @@ class MultimediaPlayer(QWidget):
             self.progress.setText(time.toString())
 
 
-    # Definindo o tamanho para a variável progress, que vai exibir o progresso de execução.
+    # Definindo o tamanho para a variável progress, que vai exibir o progresso de execução
     def sizeLabel(self):
         if not self.sizeCheck:
             self.progress.setFixedWidth(self.progress.size().width() + 3)
             self.sizeCheck = True
 
 
-    # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider.
+    # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider
     def durationChanged(self, duration):
         self.getduration = duration
         self.positionSlider.setMaximum(duration)
@@ -386,12 +386,12 @@ class MultimediaPlayer(QWidget):
         QTimer.singleShot(500, self.sizeLabel)
 
 
-    # A barra vai atualizar ao ocorrer mudanças no valor do tempo de execução.
+    # A barra vai atualizar ao ocorrer mudanças no valor do tempo de execução
     def setPosition(self, position):
         self.mediaPlayer.setPosition(position)
 
 
-    # Função que faz o programa abrir no centro da janela, claro se ele já não abrir maximizado.
+    # Função que faz o programa abrir no centro da janela, claro se ele já não abrir maximizado
     def center(self):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
@@ -399,26 +399,26 @@ class MultimediaPlayer(QWidget):
         self.move(qr.topLeft())
 
 
-    # Isso é apenas para exibir a janela sobre do programa.
+    # Isso é apenas para exibir a janela sobre do programa
     @staticmethod
     def showAbout():
         about = AboutDialog()
         about.exec_()
 
 
-    # Função para a exibição dos controles.
+    # Função para a exibição dos controles
     def showControls(self):
         self.panelSlider.show()
         self.panelControl.show()
 
 
-    # Função para ocultar os controles.
+    # Função para ocultar os controles
     def hideControls(self):
         self.panelSlider.hide()
         self.panelControl.hide()
 
 
-    # Controle do modo tela cheia feito pelo Alt+Enter.
+    # Controle do modo tela cheia feito pelo Alt+Enter e pelo menu de contexto
     def controlFullScreen(self):
         if self.isFullScreen():
             self.unFullScreen()
@@ -427,8 +427,7 @@ class MultimediaPlayer(QWidget):
         self.control = 0
 
 
-    # Esses carinhas vão ser executados de dentro de VideoWidget e PixmapLabel. Esse aqui,
-    # é para habilitar o modo de tela cheia.
+    # Esse aqui é para habilitar o modo de tela cheia
     def onFullScreen(self):
         if multimediaPlayer.isMaximized():
             self.maximize = True
@@ -438,7 +437,7 @@ class MultimediaPlayer(QWidget):
         self.showFullScreen()
 
 
-    # E esse desabilita a tela cheia.
+    # E esse desabilita a tela cheia
     def unFullScreen(self):
         if self.isFullScreen():
             QApplication.setOverrideCursor(Qt.ArrowCursor)
@@ -451,7 +450,7 @@ class MultimediaPlayer(QWidget):
                 self.showControls()
 
 
-    # Mostrar e ocultar a playlist através de menu de contexto.
+    # Mostrar e ocultar a playlist através de menu de contexto
     def showPlayList(self):
         if not setJson('playlist'):
             self.panelSHPlaylist.show()
@@ -527,7 +526,7 @@ class MultimediaPlayer(QWidget):
         menu.exec_(self.mapToGlobal(point))
 
 
-    # Somente para impedir a minimização dos controles ao posicionar o mouse sobre ele.
+    # Somente para impedir a minimização dos controles ao posicionar o mouse sobre ele
     def changeBlock(self, event):
         if event == 1:
             self.block = True
@@ -535,7 +534,7 @@ class MultimediaPlayer(QWidget):
             self.block = False
 
 
-    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem.
+    # Função para mapear os movimentos do mouse. Quando o mouse está se mexendo, os controles aparecem
     def changeMouse(self):
         x = self.mouse.position()[0]
         if self.mouse.position()[0] != x:  # Se esses valores são diferentes, o mouse tá se mexendo
