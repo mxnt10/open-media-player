@@ -16,7 +16,6 @@ from widgets import PushButton, Slider
 # Widget para a definição dos controles usados pelo reprodutor multimídia. Achei mais conveniente fazer assim,
 # conforme nos exemplos tirados do qt5, pois assim o código não vai virar uma bagunça, porque senão daqui a pouco
 # o cara não entende mais nada do que colocou no código.
-
 class PlayerControls(QWidget):
     # Captura o sinal dos botões e dos controles
     eventPoint = pyqtSignal(int)
@@ -117,7 +116,7 @@ class PlayerControls(QWidget):
 ########################################################################################################################
 
 
-    # Especial para retornar o estado da reprodução ao clicar nos botões e nos controles.
+    # Especial para retornar o estado da reprodução ao clicar nos botões e nos controles
     def state(self):
         return self.playerState
 
@@ -136,7 +135,7 @@ class PlayerControls(QWidget):
                 self.playButton.setIcon(setIconTheme(self, self.theme, 'play'))
 
 
-    # Essa é a instrução que vai fazer o botão de play/pause e stop funcionar adequadamente.
+    # Essa é a instrução que vai fazer o botão de play/pause e stop funcionar adequadamente
     def pressPlay(self):
         if self.playerState in (QMediaPlayer.StoppedState, QMediaPlayer.PausedState):
             self.play.emit()
@@ -152,19 +151,19 @@ class PlayerControls(QWidget):
             self.play.emit()
 
 
-    # Mesmo esquema que mencionei acima.
+    # Mesmo esquema que mencionei acima
     def pressPrevious(self):
         self.previous.emit()
         if self.playerState in (QMediaPlayer.StoppedState, QMediaPlayer.PausedState):
             self.play.emit()
 
 
-    # Função para retornar o volume para o reprodutor.
+    # Função para retornar o volume para o reprodutor
     def volume(self):
         return self.volumeSlider.value()
 
 
-    # Essa função vai alterar o volume do reprodutor.
+    # Essa função vai alterar o volume do reprodutor
     def setVolume(self, volume):
         if self.isMuted():
             self.pressMute()
@@ -179,12 +178,12 @@ class PlayerControls(QWidget):
         self.volumeSlider.setValue(volume)
 
 
-    # Verificando se o programa está mudo.
+    # Verificando se o programa está mudo
     def isMuted(self):
         return self.playerMuted
 
 
-    # Essa parte vai alterar o estado da saída de áudio, se está no mudo ou não.
+    # Essa parte vai alterar o estado da saída de áudio, se está no mudo ou não
     def setMuted(self, muted):
         if muted != self.playerMuted:
             self.playerMuted = muted
@@ -194,12 +193,12 @@ class PlayerControls(QWidget):
             self.muteButton.setIcon(setIconTheme(self, self.theme, 'volume_high'))
 
 
-    # Ao clicar no botão mute um sinal é emitido.
+    # Ao clicar no botão mute um sinal é emitido
     def pressMute(self):
         self.changeMuting.emit(not self.playerMuted)
 
 
-    # Função para recomeçar a playlist novamente.
+    # Função para recomeçar a playlist novamente
     def setReplay(self):
         if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Loop:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Loop)
@@ -210,7 +209,7 @@ class PlayerControls(QWidget):
             self.replayButton.setIcon(setIconTheme(self, self.theme, 'replay'))
 
 
-    # Função para reproduzir so arquivos de multimídia de forma aleatória.
+    # Função para reproduzir so arquivos de multimídia de forma aleatória
     def setShuffle(self):
         if self.main.playlist.playbackMode() != QMediaPlaylist.PlaybackMode.Random:
             self.main.playlist.setPlaybackMode(QMediaPlaylist.PlaybackMode.Random)
@@ -221,11 +220,11 @@ class PlayerControls(QWidget):
             self.shuffleButton.setIcon(setIconTheme(self, self.theme, 'shuffle'))
 
 
-    # Emissão feita ao passar o mouse nos controles.
+    # Emissão feita ao passar o mouse nos controles
     def enterEvent(self, event):
         self.eventPoint.emit(1)
 
 
-    # Emissão feita ao retirar o mouse dos controles.
+    # Emissão feita ao retirar o mouse dos controles
     def leaveEvent(self, event):
         self.eventPoint.emit(2)
