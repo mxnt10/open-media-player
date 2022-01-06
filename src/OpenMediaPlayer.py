@@ -135,6 +135,7 @@ class MultimediaPlayer(QWidget):
         self.duration.setText('--:--')
         self.progress.eventPoint.connect(self.changeBlock)
         self.duration.eventPoint.connect(self.changeBlock)
+        self.duration.setAlignment(Qt.AlignRight)
 
         # Isso aqui funciona como um conteiner para colorir os layouts dos controles.
         # Aplicando gradiente na barra de progresso.
@@ -366,24 +367,21 @@ class MultimediaPlayer(QWidget):
             self.progress.setText(time.toString())
 
 
-    # Definindo o tamanho para a variável progress, que vai exibir o progresso de execução
-    def sizeLabel(self):
-        if not self.sizeCheck:
-            self.progress.setFixedWidth(self.progress.size().width() + 3)
-            self.sizeCheck = True
-
-
     # Ao abrir e executar um arquivo multimídia, o tempo de execução será definido no positionSlider
     def durationChanged(self, duration):
         self.getduration = duration
         self.positionSlider.setMaximum(duration)
+
+        # Ajustes para a variável progress para a barra de execução não ficar mexendo do lugar
+        if not self.sizeCheck:
+            self.progress.setFixedWidth(self.progress.size().width() * 2 - 2)
+            self.duration.setFixedWidth(self.duration.size().width() * 2 - 2)
+            self.sizeCheck = True
+
         time = QTime(0, 0, 0, 0)
         time = time.addMSecs(self.mediaPlayer.duration())
         self.duration.setText(time.toString())
         self.videoWidget.fitInView(self.videoItem, Qt.KeepAspectRatio)  # Rendenizando o vídeo
-
-        # Ajustes para a variável progress para a barra de execução não ficar mexendo do lugar
-        QTimer.singleShot(500, self.sizeLabel)
 
 
     # A barra vai atualizar ao ocorrer mudanças no valor do tempo de execução

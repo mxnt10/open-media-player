@@ -6,24 +6,21 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 ## [ 1.4 ] - 2022-01-02 #############################################
 
 ### Added / Adicionado
- - Added time duration.
-###
-
-### Upgraded / Atualizado
- -
+ - Recursos:
+    - Adicionado recurso de tempo de duração.
+    - Controles ficam ocultos se a playlist não estiver visível e
+      o mouse está parado.
 ###
 
 ### Changed / Modificado
- - Replaced QVideoWidget by QGraphicsView, QGraphicsVideoItem
-   and QGraphicsScene.
-###
-
-### Removed / Removido
- -
-###
-
-### Fixed / Corrigido
- -
+ - Código:
+    - Substituído o QVideoWidget por QGraphicsView, QGraphicsVideoItem
+      e QGraphicsScene.
+    - Limpeza de código.
+ - Teclas de atalho:
+    - Trocado teclas de atalho para Next e Previous.
+    - Next: Seta UP.
+    - Previous: Seta DOWN.
 ###
 
 #####################################################################
