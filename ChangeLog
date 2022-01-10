@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
+## [ 1.5 ] - 2022-01-09 #############################################
+
+### Changed / Modificado
+ - Modificado o omp.desktop para aumentar o formato de arquivos
+   multimídia no mimetype.
+###
+
+### Fixed / Corrigido
+ - Exibição do tempo de execução.
+ - Mouse ocultando ao abrir os arquivos para execução.
+###
+
+#####################################################################
+
+
 ## [ 1.4 ] - 2022-01-02 #############################################
 
 ### Added / Adicionado
