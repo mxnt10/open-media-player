@@ -72,6 +72,10 @@ class MultimediaPlayer(QWidget):
         self.hack.timeout.connect(self.runHack)
         self.hack.start()
 
+        # Impede que o ponteiro do mouse seja ocultado
+        self.arrow = QTimer()
+        self.arrow.timeout.connect(lambda: QApplication.setOverrideCursor(Qt.ArrowCursor))
+
         # Temporizador que fica mapeando a posição do mouse
         self.mouse = PyMouse()
         self.timer = QTimer()
@@ -135,7 +139,8 @@ class MultimediaPlayer(QWidget):
         self.duration.setText('--:--')
         self.progress.eventPoint.connect(self.changeBlock)
         self.duration.eventPoint.connect(self.changeBlock)
-        self.duration.setAlignment(Qt.AlignRight)
+        self.progress.setAlignment(Qt.AlignCenter)
+        self.duration.setAlignment(Qt.AlignCenter)
 
         # Isso aqui funciona como um conteiner para colorir os layouts dos controles.
         # Aplicando gradiente na barra de progresso.
@@ -269,6 +274,7 @@ class MultimediaPlayer(QWidget):
 
     # Função usada para abrir arquivos multimídia no programa
     def openFile(self):
+        self.arrow.start()
         files, _ = QFileDialog.getOpenFileNames(
             self, 'Open Multimedia Files', QDir.homePath(),
             'Video Files (*.3gp *.3gpp *.m4v *.mp4 *.m2v *.mp2 *.mpeg *.mpg *.vob *.ogg *.ogv *.mov *.rmvb *.webm '
@@ -285,6 +291,7 @@ class MultimediaPlayer(QWidget):
             'MP3 Audio (*.mp3 *.mpga);;OGG Audio (*.oga *.opus *.spx);;Windows Media Audio (*.wma);;'
             'WAV Audio (*.wav);;WavPack Audio (*.wp *.wvp);;Media Playlist (*.m3u *.m3u8);;All Files (*);;')
         self.addToPlaylist(files)
+        self.arrow.stop()
 
 
     # Esse recurso vai adicionar os itens a lista de execução do programa
@@ -372,11 +379,9 @@ class MultimediaPlayer(QWidget):
         self.getduration = duration
         self.positionSlider.setMaximum(duration)
 
-        # Ajustes para a variável progress para a barra de execução não ficar mexendo do lugar
-        if not self.sizeCheck:
-            self.progress.setFixedWidth(self.progress.size().width() * 2 - 2)
-            self.duration.setFixedWidth(self.duration.size().width() * 2 - 2)
-            self.sizeCheck = True
+        # Ajuste do tamanho dos Labels para exibição do tempo de execução e duração
+        self.progress.setFixedWidth(65)
+        self.duration.setFixedWidth(65)
 
         time = QTime(0, 0, 0, 0)
         time = time.addMSecs(self.mediaPlayer.duration())
